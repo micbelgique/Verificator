@@ -42,7 +42,7 @@ function App() {
   const [showCam, setShowCam] = useState(false);
   const [temperature, setTemperature] = useState(30);
 
-  const handleChange = (event: Event, newValue: number | number[]) => {
+  const handleChange = (_event: Event, newValue: number | number[]) => {
     if (typeof newValue === "number") {
       setTemperature(newValue);
     }
