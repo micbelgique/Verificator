@@ -152,7 +152,7 @@ function App() {
   if (conditionRespected) {
     document.body.style.backgroundColor = "rgba(181, 251, 179, 0.87)";
   } else {
-    document.body.style.backgroundColor = "rgb(36, 36, 36)";
+    document.body.style.backgroundColor = "";
   }
 
   return (
