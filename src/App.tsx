@@ -1,5 +1,5 @@
 import "./App.css";
-import { Button } from "@mui/material";
+import { Button, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { useState, useEffect, useRef } from "react";
 import { ChangeEvent } from "react";
 import Header from "./component/Header";
@@ -13,7 +13,7 @@ interface Prediction {
 }
 
 function App() {
-  
+
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [urlValue, setUrlValue] = useState("");
   const [keyValue, setKeyValue] = useState("");
@@ -24,8 +24,10 @@ function App() {
   const [showCam, setShowCam] = useState(false);
   const [temperature, setTemperature] = useState(30);
   const videoRef = useRef<Webcam>(null);
-  const image = useRef<string | null>(null); 
-  
+  const image = useRef<string | null>(null);
+  const [webcams, setWebCams] = useState<MediaDeviceInfo[]>();
+  const [choosenCam, setChoosenCam] = useState<string>();
+
 
   const handleChange = (_event: Event, newValue: number | number[]) => {
     if (typeof newValue === "number") {
@@ -33,9 +35,23 @@ function App() {
     }
   };
 
+  //initialisation liste des camera
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then((result) => {
+      const tabCams: MediaDeviceInfo[] = result.filter((infos) => infos.kind === "videoinput")
+      setWebCams(tabCams)
+      setChoosenCam(tabCams[0].deviceId)
+      
+    });
+  }, [])
+
   //stream de la webcam
   useEffect(() => {
-    const constraints = { video: true };
+    const constraints = {
+      video: {
+        deviceId: { exact: choosenCam }
+      }
+    };
     console.log(videoRef.current);
     if (isStreaming && !conditionRespected && videoRef.current) {
       navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
@@ -44,7 +60,7 @@ function App() {
         videoRef.current!.video!.srcObject = stream;
       });
     }
-  }, [isStreaming]);
+  }, [isStreaming, choosenCam]);
 
   useEffect(() => {
     if (stream) {
@@ -56,7 +72,7 @@ function App() {
           canvas.width = video.videoWidth;
           canvas.height = video.videoHeight;
           canvas.getContext("2d")?.drawImage(video, 0, 0);
-          image.current=canvas.toDataURL("image/png");
+          image.current = canvas.toDataURL("image/png");
         };
       }, 500);
 
@@ -82,6 +98,9 @@ function App() {
   };
   const handleNextStepChange = (event: ChangeEvent<HTMLInputElement>) => {
     setNextStepValue(event.target.value);
+  };
+  const handleSelectCamChange = (event: SelectChangeEvent) => {
+    setChoosenCam(event.target.value as string);
   };
 
   //fonction pour convertir l'image en blob
@@ -195,6 +214,19 @@ function App() {
           >
             📸
           </Button>
+
+          <Select
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            value={choosenCam}
+            label="Webcam"
+            onChange={handleSelectCamChange}
+          >
+            {webcams?.map((camInfo) =>{
+              return <MenuItem value={camInfo.deviceId}>{camInfo.label}</MenuItem>
+            })}
+            
+          </Select>
         </>
       )}
 
