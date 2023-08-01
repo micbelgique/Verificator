@@ -1,15 +1,10 @@
-import micLogo from "/MIC.svg";
 import "./App.css";
-import {
-  TextField,
-  Button,
-  Container,
-  Slider,
-  Typography,
-} from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useState, useEffect } from "react";
+import { Button } from "@mui/material";
+import { useState, useEffect, useRef } from "react";
 import { ChangeEvent } from "react";
+import Header from "./component/Header";
+import Form from "./component/Form";
+import Webcam from "react-webcam";
 
 interface Prediction {
   probability: number;
@@ -17,21 +12,8 @@ interface Prediction {
   tagName: string;
 }
 
-//theme
-const theme = createTheme({
-  palette: {
-    mode: "dark",
-    primary: {
-      main: "#90caf9",
-    },
-    secondary: {
-      main: "#f48fb1",
-    },
-  },
-});
-
 function App() {
-  const [image, setImage] = useState<string | null>(null);
+  
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [urlValue, setUrlValue] = useState("");
   const [keyValue, setKeyValue] = useState("");
@@ -41,18 +23,25 @@ function App() {
   const [conditionRespected, setConditionRespected] = useState(false);
   const [showCam, setShowCam] = useState(false);
   const [temperature, setTemperature] = useState(30);
+  const videoRef = useRef<Webcam>(null);
+  const image = useRef<string | null>(null); 
+  
 
   const handleChange = (_event: Event, newValue: number | number[]) => {
     if (typeof newValue === "number") {
       setTemperature(newValue);
     }
   };
+
   //stream de la webcam
   useEffect(() => {
     const constraints = { video: true };
-    if (isStreaming && !conditionRespected) {
+    console.log(videoRef.current);
+    if (isStreaming && !conditionRespected && videoRef.current) {
       navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
         setStream(stream);
+
+        videoRef.current!.video!.srcObject = stream;
       });
     }
   }, [isStreaming]);
@@ -60,16 +49,16 @@ function App() {
   useEffect(() => {
     if (stream) {
       const interval = setInterval(() => {
-        const video = document.createElement("video");
-        video.srcObject = stream;
+        const video = videoRef.current?.video;
+        if (!video) return;
         video.onloadedmetadata = () => {
           const canvas = document.createElement("canvas");
           canvas.width = video.videoWidth;
           canvas.height = video.videoHeight;
           canvas.getContext("2d")?.drawImage(video, 0, 0);
-          setImage(canvas.toDataURL("image/png"));
+          image.current=canvas.toDataURL("image/png");
         };
-      }, 24);
+      }, 500);
 
       return () => clearInterval(interval);
     }
@@ -119,7 +108,7 @@ function App() {
   //fonction pour revenir au menu
   const backRoot = () => {
     setIsStreaming(false);
-    setImage(null);
+    image.current = null;
     setConditionRespected(false);
     setShowCam(false);
   };
@@ -134,7 +123,7 @@ function App() {
           "Prediction-Key": keyValue,
           "Content-Type": "application/octet-stream",
         },
-        body: dataUrlToFile(image),
+        body: dataUrlToFile(image.current!),
       });
       const data = await response.json();
       data.predictions.forEach((prediction: Prediction) => {
@@ -157,142 +146,86 @@ function App() {
 
   return (
     <>
-      <>
-        {!isStreaming ? (
-          <>
-            <header>
-              <a href="https://www.mic-belgique.be/" target="_blank">
-                <img src={micLogo} className="logo" alt="Vite logo" />
-              </a>
-            </header>
-            <Container
-              sx={{ display: "flex", flexDirection: "column", mt: "6rem" }}
-            >
-              <ThemeProvider theme={theme}>
-                <TextField
-                  fullWidth
-                  id="urlField"
-                  label="Url"
-                  variant="standard"
-                  value={urlValue}
-                  onChange={handleUrlChange}
-                />
-                <TextField
-                  fullWidth
-                  id="keyField"
-                  label="Key"
-                  variant="standard"
-                  value={keyValue}
-                  onChange={handleKeyChange}
-                />
-                <TextField
-                  id="tagField"
-                  label="Tag"
-                  variant="standard"
-                  value={tagValue}
-                  onChange={handleTagChange}
-                />
+      <Webcam
+        audio={false}
+        height={720}
+        width={1280}
+        ref={videoRef}
+        hidden={!showCam}
+      />
+      {!isStreaming ? (
+        <>
+          <Header />
+          <Form
+            urlValue={urlValue}
+            handleUrlChange={handleUrlChange}
+            keyValue={keyValue}
+            handleKeyChange={handleKeyChange}
+            tagValue={tagValue}
+            handleTagChange={handleTagChange}
+            temperature={temperature}
+            handleChange={handleChange}
+            nextStepValue={nextStepValue}
+            handleNextStepChange={handleNextStepChange}
+            checkVideo={checkVideo}
+          />
+        </>
+      ) : (
+        <>
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: "#7bbaff",
+              fontWeight: "bold",
+              mt: "2rem",
+              mr: "1rem",
+            }}
+            onClick={backRoot}
+          >
+            back
+          </Button>
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: "#7bbaff",
+              fontWeight: "bold",
+              mt: "2rem",
+            }}
+            onClick={OpenCamera}
+          >
+            📸
+          </Button>
+        </>
+      )}
 
-                <Typography
-                  sx={{ color: "currentColor", padding: "8px 0 5px", m: "0" }}
-                >
-                  Confidence : {temperature}
-                </Typography>
-
-                <Slider
-                  sx={{
-                    color: "#7bbaff",
-                  }}
-                  aria-label="Temperature"
-                  defaultValue={30}
-                  value={temperature}
-                  onChange={handleChange}
-                  // valueLabelDisplay="auto"
-                  step={1}
-                  marks
-                  min={0}
-                  max={100}
-                />
-
-                <TextField
-                  id="nextStep"
-                  label="Next Step"
-                  variant="standard"
-                  value={nextStepValue}
-                  onChange={handleNextStepChange}
-                />
+      {image && isStreaming ? (
+        <>
+          {conditionRespected ? (
+            <h1>
+              <a href={nextStepValue}>
                 <Button
                   variant="contained"
                   sx={{
                     backgroundColor: "#7bbaff",
                     fontWeight: "bold",
-                    mt: "2rem",
                   }}
-                  onClick={checkVideo}
                 >
-                  Check
+                  Next
                 </Button>
-              </ThemeProvider>
-            </Container>
-          </>
-        ) : (
-          <>
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "#7bbaff",
-                fontWeight: "bold",
-                mt: "2rem",
-                mr: "1rem",
-              }}
-              onClick={backRoot}
-            >
-              back
-            </Button>
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "#7bbaff",
-                fontWeight: "bold",
-                mt: "2rem",
-              }}
-              onClick={OpenCamera}
-            >
-              📸
-            </Button>
-          </>
-        )}
-
-        {image && isStreaming ? (
-          <>
-            {conditionRespected ? (
-              <h1>
-                <a href={nextStepValue}>
-                  <Button
-                    variant="contained"
-                    sx={{
-                      backgroundColor: "#7bbaff",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Next
-                  </Button>
-                  <br></br>
-                  <br></br>
-                </a>
-                ✅
-              </h1>
-            ) : (
-              <>
-                <h1>❌</h1>
-                {showCam ? <img src={image} alt="camera capture" /> : <p></p>}
-              </>
-            )}
-          </>
-        ) : (
-          <p></p>
-        )}
-      </>
+                <br></br>
+                <br></br>
+              </a>
+              ✅
+            </h1>
+          ) : (
+            <>
+              <h1>❌</h1>
+            </>
+          )}
+        </>
+      ) : (
+        <p></p>
+      )}
     </>
   );
 }
