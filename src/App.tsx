@@ -5,6 +5,7 @@ import { ChangeEvent } from "react";
 import Header from "./component/Header";
 import Form from "./component/Form";
 import Webcam from "react-webcam";
+import { useParams } from "react-router-dom";
 
 interface Prediction {
   probability: number;
@@ -13,20 +14,23 @@ interface Prediction {
 }
 
 function App() {
-
+  const searchParams = new URLSearchParams(document.location.search)
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [urlValue, setUrlValue] = useState("");
   const [keyValue, setKeyValue] = useState("");
   const [tagValue, setTagValue] = useState("");
   const [nextStepValue, setNextStepValue] = useState("");
+  const [temperature, setTemperature] = useState(30);
+  
   const [isStreaming, setIsStreaming] = useState(false);
   const [conditionRespected, setConditionRespected] = useState(false);
   const [showCam, setShowCam] = useState(false);
-  const [temperature, setTemperature] = useState(30);
+
   const videoRef = useRef<Webcam>(null);
   const image = useRef<string | null>(null);
   const [webcams, setWebCams] = useState<MediaDeviceInfo[]>();
   const [choosenCam, setChoosenCam] = useState<string>();
+  
 
 
   const handleChange = (_event: Event, newValue: number | number[]) => {
@@ -34,6 +38,17 @@ function App() {
       setTemperature(newValue);
     }
   };
+
+  //test recuperation parametre via URL
+  useEffect(()=>{
+    
+    setUrlValue(searchParams.get('URL') ?? "")
+    setKeyValue(searchParams.get('KEY') ?? "")
+    setTagValue(searchParams.get('TAG') ?? "")
+    setTemperature(parseFloat(searchParams.get('TEMP') ?? "75"))
+    setNextStepValue(searchParams.get('REDIRECT') ?? "")
+    
+  },[])
 
   //initialisation liste des camera
   useEffect(() => {
@@ -81,10 +96,10 @@ function App() {
   }, [stream]);
 
   useEffect(() => {
-    if (image && isStreaming) {
+    if (image.current && isStreaming) {
       checkVideo();
     }
-  }, [image]);
+  }, [image.current]);
 
   //fonctions pour récupérer les valeurs des inputs
   const handleUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -135,7 +150,9 @@ function App() {
   //fonction pour envoyer l'image à l'API
   const checkVideo = async () => {
     setIsStreaming(true);
-    if (image && conditionRespected == false) {
+    console.log(image.current, conditionRespected )
+    if (image.current && conditionRespected == false) {
+      console.log("JE RENTRE DANS LE POST")
       const response = await fetch(urlValue, {
         method: "Post",
         headers: {
@@ -223,7 +240,7 @@ function App() {
             onChange={handleSelectCamChange}
           >
             {webcams?.map((camInfo) =>{
-              return <MenuItem value={camInfo.deviceId}>{camInfo.label}</MenuItem>
+              return <MenuItem key={camInfo.deviceId} value={camInfo.deviceId}>{camInfo.label}</MenuItem>
             })}
             
           </Select>
