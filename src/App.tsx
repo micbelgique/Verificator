@@ -41,21 +41,13 @@ function App() {
     navigator.mediaDevices.enumerateDevices().then((result) => {
       const tabCams: MediaDeviceInfo[] = result.filter((infos) => infos.kind === "videoinput")
       setWebCams(tabCams)
-      // setChoosenCam(tabCams[0].deviceId)
+      setChoosenCam(tabCams[0].deviceId)
       // console.log(tabCams[0].deviceId)
 
     });
   }, [])
 
-  useEffect(()=>{
-    if(webcams) setChoosenCam(webcams[0].deviceId)
-    
-  }, [webcams])
 
-  useEffect(()=>{
-    console.log("test with " + choosenCam)
-    
-  }, [choosenCam])
 
 
   //stream de la webcam
@@ -306,26 +298,25 @@ function App() {
 
   return (
     <div>
-      <Webcam
-        audio={false}
-        height={720}
-        width={1280}
-        ref={videoRef}
-
-      />
+      
       {choosenCam !== undefined &&
-        <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={choosenCam}
-          label="Webcam"
-          onChange={handleSelectCamChange}
-        >
-          {webcams?.map((camInfo) => {
-            return <MenuItem key={camInfo.deviceId} value={camInfo.deviceId}>{camInfo.label}</MenuItem>
-          })}
+        <><Webcam
+          audio={false}
+          height={720}
+          width={1280}
+          ref={videoRef} />
+          <Select
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            value={choosenCam}
+            label="Webcam"
+            onChange={handleSelectCamChange}
+          >
+            {webcams?.map((camInfo) => {
+              return <MenuItem key={camInfo.deviceId} value={camInfo.deviceId}>{camInfo.label}</MenuItem>;
+            })}
 
-        </Select>
+          </Select></>
       }
       {conditionRespected ? (
         <h1>
