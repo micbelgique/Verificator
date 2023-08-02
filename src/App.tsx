@@ -16,19 +16,14 @@ interface Prediction {
 function App() {
   const searchParams = new URLSearchParams(document.location.search)
   const [stream, setStream] = useState<MediaStream | null>(null);
-  // const [urlValue, setUrlValue] = useState("");
-  // const [keyValue, setKeyValue] = useState("");
-  // const [tagValue, setTagValue] = useState("");
-  // const [nextStepValue, setNextStepValue] = useState("");
-  // const [temperature, setTemperature] = useState(30);
+
 
   const [isStreaming, setIsStreaming] = useState(true);
   const [conditionRespected, setConditionRespected] = useState(false);
   const [showCam, setShowCam] = useState(false);
 
   const videoRef = useRef<Webcam>(null);
-  // const image = useRef<string | null>(null);
-  // const [image, setImage] = useState<string | null>("");
+
   const image = useRef<string | null | undefined>(null)
 
   const intervalRef = useRef<number | undefined>(undefined);
@@ -37,36 +32,31 @@ function App() {
 
 
 
-  const handleChange = (_event: Event, newValue: number | number[]) => {
-    if (typeof newValue === "number") {
-      setTemperature(newValue);
-    }
-  };
 
-  //test recuperation parametre via URL
-  useEffect(() => {
-    // console.log(searchParams.get('URL'), "test")
-    // console.log(searchParams.get('KEY'))
-    // console.log(searchParams.get('TAG'))
-    // console.log(searchParams.get('TEMP'))
-    // console.log(searchParams.get('REDIRECT'))
-    // setUrlValue(searchParams.get('URL') ?? "")
-    // setKeyValue(searchParams.get('KEY') ?? "")
-    // setTagValue(searchParams.get('TAG') ?? "")
-    // setTemperature(parseFloat(searchParams.get('TEMP') ?? "75"))
-    // setNextStepValue(searchParams.get('REDIRECT') ?? "")
 
-  }, [])
+
 
   //initialisation liste des camera
   useEffect(() => {
     navigator.mediaDevices.enumerateDevices().then((result) => {
       const tabCams: MediaDeviceInfo[] = result.filter((infos) => infos.kind === "videoinput")
       setWebCams(tabCams)
-      setChoosenCam(tabCams[0].deviceId)
+      // setChoosenCam(tabCams[0].deviceId)
+      // console.log(tabCams[0].deviceId)
 
     });
   }, [])
+
+  useEffect(()=>{
+    if(webcams) setChoosenCam(webcams[0].deviceId)
+    
+  }, [webcams])
+
+  useEffect(()=>{
+    console.log("test with " + choosenCam)
+    
+  }, [choosenCam])
+
 
   //stream de la webcam
   useEffect(() => {
@@ -81,7 +71,7 @@ function App() {
         setStream(stream);
 
         videoRef.current!.video!.srcObject = stream;
-        
+
       });
     }
   }, [isStreaming, choosenCam]);
@@ -90,7 +80,7 @@ function App() {
   const captureImage = () => {
 
     const video = videoRef.current?.video!
-    
+
     const canvas: HTMLCanvasElement = document.createElement('canvas');
 
     canvas.width = video.videoWidth;
@@ -99,18 +89,18 @@ function App() {
     if (context != null) {
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       const imageDataURL = canvas.toDataURL("image/png");
-     
+
       image.current = imageDataURL
-    // console.log(videoRef.current)
+      // console.log(videoRef.current)
       //  image.current = videoRef.current?.getScreenshot();
-    //   console.log(image.current)
+      //   console.log(image.current)
     }
-    
+
 
   };
 
   useEffect(() => {
-    if(!isStreaming) return;
+    if (!isStreaming) return;
     intervalRef.current = setInterval(() => {
       captureImage();
       checkVideo();
@@ -143,9 +133,9 @@ function App() {
   // const handleNextStepChange = (event: ChangeEvent<HTMLInputElement>) => {
   //   setNextStepValue(event.target.value);
   // };
-  // const handleSelectCamChange = (event: SelectChangeEvent) => {
-  //   setChoosenCam(event.target.value as string);
-  // };
+  const handleSelectCamChange = (event: SelectChangeEvent) => {
+    setChoosenCam(event.target.value as string);
+  };
 
   //fonction pour convertir l'image en blob
   const dataUrlToFile = (dataUrl: string) => {
@@ -179,14 +169,14 @@ function App() {
   //fonction pour envoyer l'image à l'API
   const checkVideo = async () => {
     setIsStreaming(true);
-    let urlValue =searchParams.get('URL') ?? "";
-    let keyValue =searchParams.get('KEY') ?? "";
-    let tagValue =searchParams.get('TAG') ?? "";
-    let temperature =parseFloat(searchParams.get('TEMP') ?? "75");
-  
-    
+    let urlValue = searchParams.get('URL') ?? "";
+    let keyValue = searchParams.get('KEY') ?? "";
+    let tagValue = searchParams.get('TAG') ?? "";
+    let temperature = parseFloat(searchParams.get('TEMP') ?? "75");
+
+
     if (image.current && conditionRespected === false) {
-     console.log(urlValue)
+      console.log(urlValue)
       const response = await fetch(urlValue, {
         method: "Post",
         headers: {
@@ -196,7 +186,7 @@ function App() {
         body: dataUrlToFile(image.current!),
       });
       const data = await response.json();
-     
+
       data.predictions.forEach((prediction: Prediction) => {
         if (
           prediction.probability > temperature / 100 &&
@@ -222,7 +212,7 @@ function App() {
   //       height={720}
   //       width={1280}
   //       ref={videoRef}
-        
+
   //     />
   //     <img src={image.current!} hidden={!showCam}></img>
   //     {!isStreaming ? (
@@ -314,39 +304,52 @@ function App() {
   //   </>
   // );
 
-  return(
+  return (
     <div>
       <Webcam
         audio={false}
         height={720}
         width={1280}
         ref={videoRef}
-        
+
       />
-     
+      {choosenCam !== undefined &&
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={choosenCam}
+          label="Webcam"
+          onChange={handleSelectCamChange}
+        >
+          {webcams?.map((camInfo) => {
+            return <MenuItem key={camInfo.deviceId} value={camInfo.deviceId}>{camInfo.label}</MenuItem>
+          })}
+
+        </Select>
+      }
       {conditionRespected ? (
-            <h1>
-              <a href={searchParams.get('REDIRECT') ?? ""}>
-                <Button
-                  variant="contained"
-                  sx={{
-                    backgroundColor: "#7bbaff",
-                    fontWeight: "bold",
-                  }}
-                >
-                  Next
-                </Button>
-                <br></br>
-                <br></br>
-              </a>
-              ✅
-            </h1>
-          ) : (
-            <>
-              <h1>❌</h1>
-              <CircularProgress />
-            </>
-          )}
+        <h1>
+          <a href={searchParams.get('REDIRECT') ?? ""}>
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "#7bbaff",
+                fontWeight: "bold",
+              }}
+            >
+              Next
+            </Button>
+            <br></br>
+            <br></br>
+          </a>
+          ✅
+        </h1>
+      ) : (
+        <>
+          <h1>❌</h1>
+          <CircularProgress />
+        </>
+      )}
     </div>
   );
 }
