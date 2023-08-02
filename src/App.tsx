@@ -1,5 +1,5 @@
 import "./App.css";
-import { Button, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import { Button, CircularProgress, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ChangeEvent } from "react";
 import Header from "./component/Header";
@@ -16,13 +16,13 @@ interface Prediction {
 function App() {
   const searchParams = new URLSearchParams(document.location.search)
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [urlValue, setUrlValue] = useState("");
-  const [keyValue, setKeyValue] = useState("");
-  const [tagValue, setTagValue] = useState("");
-  const [nextStepValue, setNextStepValue] = useState("");
-  const [temperature, setTemperature] = useState(30);
+  // const [urlValue, setUrlValue] = useState("");
+  // const [keyValue, setKeyValue] = useState("");
+  // const [tagValue, setTagValue] = useState("");
+  // const [nextStepValue, setNextStepValue] = useState("");
+  // const [temperature, setTemperature] = useState(30);
 
-  const [isStreaming, setIsStreaming] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(true);
   const [conditionRespected, setConditionRespected] = useState(false);
   const [showCam, setShowCam] = useState(false);
 
@@ -45,7 +45,11 @@ function App() {
 
   //test recuperation parametre via URL
   useEffect(() => {
-
+    // console.log(searchParams.get('URL'), "test")
+    // console.log(searchParams.get('KEY'))
+    // console.log(searchParams.get('TAG'))
+    // console.log(searchParams.get('TEMP'))
+    // console.log(searchParams.get('REDIRECT'))
     // setUrlValue(searchParams.get('URL') ?? "")
     // setKeyValue(searchParams.get('KEY') ?? "")
     // setTagValue(searchParams.get('TAG') ?? "")
@@ -95,7 +99,7 @@ function App() {
     if (context != null) {
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       const imageDataURL = canvas.toDataURL("image/png");
-      console.log(canvas.toDataURL()) // Convertir l'image en base64
+     
       image.current = imageDataURL
     // console.log(videoRef.current)
       //  image.current = videoRef.current?.getScreenshot();
@@ -127,21 +131,21 @@ function App() {
   // }, [image, isStreaming])
 
   //fonctions pour récupérer les valeurs des inputs
-  const handleUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setUrlValue(event.target.value);
-  };
-  const handleKeyChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setKeyValue(event.target.value);
-  };
-  const handleTagChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setTagValue(event.target.value);
-  };
-  const handleNextStepChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setNextStepValue(event.target.value);
-  };
-  const handleSelectCamChange = (event: SelectChangeEvent) => {
-    setChoosenCam(event.target.value as string);
-  };
+  // const handleUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
+  //   setUrlValue(event.target.value);
+  // };
+  // const handleKeyChange = (event: ChangeEvent<HTMLInputElement>) => {
+  //   setKeyValue(event.target.value);
+  // };
+  // const handleTagChange = (event: ChangeEvent<HTMLInputElement>) => {
+  //   setTagValue(event.target.value);
+  // };
+  // const handleNextStepChange = (event: ChangeEvent<HTMLInputElement>) => {
+  //   setNextStepValue(event.target.value);
+  // };
+  // const handleSelectCamChange = (event: SelectChangeEvent) => {
+  //   setChoosenCam(event.target.value as string);
+  // };
 
   //fonction pour convertir l'image en blob
   const dataUrlToFile = (dataUrl: string) => {
@@ -175,10 +179,14 @@ function App() {
   //fonction pour envoyer l'image à l'API
   const checkVideo = async () => {
     setIsStreaming(true);
-
+    let urlValue =searchParams.get('URL') ?? "";
+    let keyValue =searchParams.get('KEY') ?? "";
+    let tagValue =searchParams.get('TAG') ?? "";
+    let temperature =parseFloat(searchParams.get('TEMP') ?? "75");
+  
+    
     if (image.current && conditionRespected === false) {
-      console.log("JE RENTRE DANS LE POST")
-      console.log(image.current)
+     console.log(urlValue)
       const response = await fetch(urlValue, {
         method: "Post",
         headers: {
@@ -188,7 +196,7 @@ function App() {
         body: dataUrlToFile(image.current!),
       });
       const data = await response.json();
-      console.log(data)
+     
       data.predictions.forEach((prediction: Prediction) => {
         if (
           prediction.probability > temperature / 100 &&
@@ -202,12 +210,112 @@ function App() {
 
   if (conditionRespected) {
     document.body.style.backgroundColor = "rgba(181, 251, 179, 0.87)";
+
   } else {
     document.body.style.backgroundColor = "";
   }
 
-  return (
-    <>
+  // return (
+  //   <>
+  //     <Webcam
+  //       audio={false}
+  //       height={720}
+  //       width={1280}
+  //       ref={videoRef}
+        
+  //     />
+  //     <img src={image.current!} hidden={!showCam}></img>
+  //     {!isStreaming ? (
+  //       <>
+  //         <Header />
+  //         <Form
+  //           urlValue={urlValue}
+  //           handleUrlChange={handleUrlChange}
+  //           keyValue={keyValue}
+  //           handleKeyChange={handleKeyChange}
+  //           tagValue={tagValue}
+  //           handleTagChange={handleTagChange}
+  //           temperature={temperature}
+  //           handleChange={handleChange}
+  //           nextStepValue={nextStepValue}
+  //           handleNextStepChange={handleNextStepChange}
+  //           setIsStreaming={setIsStreaming}
+  //         />
+  //       </>
+  //     ) : (
+  //       <>
+  //         <Button
+  //           variant="contained"
+  //           sx={{
+  //             backgroundColor: "#7bbaff",
+  //             fontWeight: "bold",
+  //             mt: "2rem",
+  //             mr: "1rem",
+  //           }}
+  //           onClick={backRoot}
+  //         >
+  //           back
+  //         </Button>
+  //         <Button
+  //           variant="contained"
+  //           sx={{
+  //             backgroundColor: "#7bbaff",
+  //             fontWeight: "bold",
+  //             mt: "2rem",
+  //           }}
+  //           onClick={OpenCamera}
+  //         >
+  //           📸
+  //         </Button>
+
+  //         <Select
+  //           labelId="demo-simple-select-label"
+  //           id="demo-simple-select"
+  //           value={choosenCam}
+  //           label="Webcam"
+  //           onChange={handleSelectCamChange}
+  //         >
+  //           {webcams?.map((camInfo) => {
+  //             return <MenuItem key={camInfo.deviceId} value={camInfo.deviceId}>{camInfo.label}</MenuItem>
+  //           })}
+
+  //         </Select>
+  //       </>
+  //     )}
+
+  //     {image.current && isStreaming ? (
+  //       <>
+  //         {conditionRespected ? (
+  //           <h1>
+  //             <a href={nextStepValue}>
+  //               <Button
+  //                 variant="contained"
+  //                 sx={{
+  //                   backgroundColor: "#7bbaff",
+  //                   fontWeight: "bold",
+  //                 }}
+  //               >
+  //                 Next
+  //               </Button>
+  //               <br></br>
+  //               <br></br>
+  //             </a>
+  //             ✅
+  //           </h1>
+  //         ) : (
+  //           <>
+  //             <h1>❌</h1>
+  //           </>
+  //         )}
+  //       </>
+  //     ) : (
+  //       <p></p>
+  //     )}
+  //   </>
+  // );
+
+  return(
+    <div>
       <Webcam
         audio={false}
         height={720}
@@ -215,70 +323,10 @@ function App() {
         ref={videoRef}
         
       />
-      <img src={image.current!} hidden={!showCam}></img>
-      {!isStreaming ? (
-        <>
-          <Header />
-          <Form
-            urlValue={urlValue}
-            handleUrlChange={handleUrlChange}
-            keyValue={keyValue}
-            handleKeyChange={handleKeyChange}
-            tagValue={tagValue}
-            handleTagChange={handleTagChange}
-            temperature={temperature}
-            handleChange={handleChange}
-            nextStepValue={nextStepValue}
-            handleNextStepChange={handleNextStepChange}
-            setIsStreaming={setIsStreaming}
-          />
-        </>
-      ) : (
-        <>
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: "#7bbaff",
-              fontWeight: "bold",
-              mt: "2rem",
-              mr: "1rem",
-            }}
-            onClick={backRoot}
-          >
-            back
-          </Button>
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: "#7bbaff",
-              fontWeight: "bold",
-              mt: "2rem",
-            }}
-            onClick={OpenCamera}
-          >
-            📸
-          </Button>
-
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={choosenCam}
-            label="Webcam"
-            onChange={handleSelectCamChange}
-          >
-            {webcams?.map((camInfo) => {
-              return <MenuItem key={camInfo.deviceId} value={camInfo.deviceId}>{camInfo.label}</MenuItem>
-            })}
-
-          </Select>
-        </>
-      )}
-
-      {image.current && isStreaming ? (
-        <>
-          {conditionRespected ? (
+     
+      {conditionRespected ? (
             <h1>
-              <a href={nextStepValue}>
+              <a href={searchParams.get('REDIRECT') ?? ""}>
                 <Button
                   variant="contained"
                   sx={{
@@ -296,13 +344,10 @@ function App() {
           ) : (
             <>
               <h1>❌</h1>
+              <CircularProgress />
             </>
           )}
-        </>
-      ) : (
-        <p></p>
-      )}
-    </>
+    </div>
   );
 }
 
