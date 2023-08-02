@@ -1,11 +1,11 @@
 import "./App.css";
 import { Button, MenuItem, Select, SelectChangeEvent } from "@mui/material";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ChangeEvent } from "react";
 import Header from "./component/Header";
 import Form from "./component/Form";
 import Webcam from "react-webcam";
-import { useParams } from "react-router-dom";
+
 
 interface Prediction {
   probability: number;
@@ -27,7 +27,10 @@ function App() {
   const [showCam, setShowCam] = useState(false);
 
   const videoRef = useRef<Webcam>(null);
-  const image = useRef<string | null>(null);
+  // const image = useRef<string | null>(null);
+  const [image, setImage] = useState<string | null>("");
+  
+  const intervalRef = useRef<number | undefined>(undefined);
   const [webcams, setWebCams] = useState<MediaDeviceInfo[]>();
   const [choosenCam, setChoosenCam] = useState<string>();
   
@@ -42,11 +45,11 @@ function App() {
   //test recuperation parametre via URL
   useEffect(()=>{
     
-    setUrlValue(searchParams.get('URL') ?? "")
-    setKeyValue(searchParams.get('KEY') ?? "")
-    setTagValue(searchParams.get('TAG') ?? "")
-    setTemperature(parseFloat(searchParams.get('TEMP') ?? "75"))
-    setNextStepValue(searchParams.get('REDIRECT') ?? "")
+    // setUrlValue(searchParams.get('URL') ?? "")
+    // setKeyValue(searchParams.get('KEY') ?? "")
+    // setTagValue(searchParams.get('TAG') ?? "")
+    // setTemperature(parseFloat(searchParams.get('TEMP') ?? "75"))
+    // setNextStepValue(searchParams.get('REDIRECT') ?? "")
     
   },[])
 
@@ -67,7 +70,7 @@ function App() {
         deviceId: { exact: choosenCam }
       }
     };
-    console.log(videoRef.current);
+   
     if (isStreaming && !conditionRespected && videoRef.current) {
       navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
         setStream(stream);
@@ -77,29 +80,37 @@ function App() {
     }
   }, [isStreaming, choosenCam]);
 
-  useEffect(() => {
-    if (stream) {
-      const interval = setInterval(() => {
-        const video = videoRef.current?.video;
-        if (!video) return;
-        video.onloadedmetadata = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          canvas.getContext("2d")?.drawImage(video, 0, 0);
-          image.current = canvas.toDataURL("image/png");
-        };
-      }, 500);
-
-      return () => clearInterval(interval);
-    }
-  }, [stream]);
+   // Méthode pour capturer une image depuis le flux vidéo
+   const captureImage = () => {
+    const video = videoRef.current?.video!
+    const canvas : HTMLCanvasElement = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d')!.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageDataURL = canvas.toDataURL("image/png"); // Convertir l'image en base64
+    setImage(imageDataURL);
+  };
 
   useEffect(() => {
-    if (image.current && isStreaming) {
-      checkVideo();
-    }
-  }, [image.current]);
+ 
+    intervalRef.current = setInterval(() => {
+      captureImage();
+      if(isStreaming) checkVideo();
+      
+    }, 500);
+
+    // Nettoyer l'intervalle lorsque le composant est démonté
+    return () => {
+      clearInterval(intervalRef.current);
+    };
+  }, [isStreaming]);
+
+  // useEffect(() => {
+  //   console.log("get into useEffect with this image :", image)
+  //   if (imageForAPIRef.current === image && image && isStreaming) {
+  //     checkVideo();
+  //   }
+  // }, [image, isStreaming])
 
   //fonctions pour récupérer les valeurs des inputs
   const handleUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -142,7 +153,7 @@ function App() {
   //fonction pour revenir au menu
   const backRoot = () => {
     setIsStreaming(false);
-    image.current = null;
+    setImage(null);
     setConditionRespected(false);
     setShowCam(false);
   };
@@ -150,16 +161,17 @@ function App() {
   //fonction pour envoyer l'image à l'API
   const checkVideo = async () => {
     setIsStreaming(true);
-    console.log(image.current, conditionRespected )
-    if (image.current && conditionRespected == false) {
+    console.log(image, conditionRespected)
+    if (image && conditionRespected === false) {
       console.log("JE RENTRE DANS LE POST")
+      
       const response = await fetch(urlValue, {
         method: "Post",
         headers: {
           "Prediction-Key": keyValue,
           "Content-Type": "application/octet-stream",
         },
-        body: dataUrlToFile(image.current!),
+        body: dataUrlToFile(image),
       });
       const data = await response.json();
       data.predictions.forEach((prediction: Prediction) => {
@@ -203,7 +215,7 @@ function App() {
             handleChange={handleChange}
             nextStepValue={nextStepValue}
             handleNextStepChange={handleNextStepChange}
-            checkVideo={checkVideo}
+            setIsStreaming={setIsStreaming}
           />
         </>
       ) : (

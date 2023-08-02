@@ -13,7 +13,8 @@ interface FormProps {
   handleChange: (_event: Event, newValue: number | number[]) => void;
   nextStepValue: string;
   handleNextStepChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  checkVideo: () => void;
+  // checkVideo: () => void;
+  setIsStreaming: (value : boolean) => void;
 }
 
 const theme = createTheme({
@@ -39,7 +40,7 @@ function Form({
   handleChange,
   nextStepValue,
   handleNextStepChange,
-  checkVideo,
+  setIsStreaming,
 }: FormProps) {
   return (
     <Container sx={{ display: "flex", flexDirection: "column", mt: "6rem" }}>
@@ -100,7 +101,7 @@ function Form({
             fontWeight: "bold",
             mt: "2rem",
           }}
-          onClick={checkVideo}
+          onClick={() => setIsStreaming(true)}
         >
           Check
         </Button>
