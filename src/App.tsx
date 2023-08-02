@@ -1,9 +1,6 @@
 import "./App.css";
 import { Button, CircularProgress, MenuItem, Select, SelectChangeEvent } from "@mui/material";
-import { useState, useEffect, useRef, useCallback } from "react";
-import { ChangeEvent } from "react";
-import Header from "./component/Header";
-import Form from "./component/Form";
+import { useState, useEffect, useRef } from "react";
 import Webcam from "react-webcam";
 
 
@@ -15,12 +12,12 @@ interface Prediction {
 
 function App() {
   const searchParams = new URLSearchParams(document.location.search)
-  const [stream, setStream] = useState<MediaStream | null>(null);
+  
 
 
   const [isStreaming, setIsStreaming] = useState(true);
   const [conditionRespected, setConditionRespected] = useState(false);
-  const [showCam, setShowCam] = useState(false);
+
 
   const videoRef = useRef<Webcam>(null);
 
@@ -29,12 +26,6 @@ function App() {
   const intervalRef = useRef<number | undefined>(undefined);
   const [webcams, setWebCams] = useState<MediaDeviceInfo[]>();
   const [choosenCam, setChoosenCam] = useState<string>();
-
-
-
-
-
-
 
   //initialisation liste des camera
   useEffect(() => {
@@ -47,9 +38,6 @@ function App() {
     });
   }, [])
 
-
-
-
   //stream de la webcam
   useEffect(() => {
     const constraints = {
@@ -60,7 +48,6 @@ function App() {
 
     if (isStreaming && !conditionRespected && videoRef.current) {
       navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-        setStream(stream);
 
         videoRef.current!.video!.srcObject = stream;
 
@@ -83,9 +70,7 @@ function App() {
       const imageDataURL = canvas.toDataURL("image/png");
 
       image.current = imageDataURL
-      // console.log(videoRef.current)
-      //  image.current = videoRef.current?.getScreenshot();
-      //   console.log(image.current)
+
     }
 
 
@@ -105,26 +90,6 @@ function App() {
     };
   }, [isStreaming]);
 
-  // useEffect(() => {
-  //   console.log("get into useEffect with this image :", image)
-  //   if (imageForAPIRef.current === image && image && isStreaming) {
-  //     checkVideo();
-  //   }
-  // }, [image, isStreaming])
-
-  //fonctions pour récupérer les valeurs des inputs
-  // const handleUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
-  //   setUrlValue(event.target.value);
-  // };
-  // const handleKeyChange = (event: ChangeEvent<HTMLInputElement>) => {
-  //   setKeyValue(event.target.value);
-  // };
-  // const handleTagChange = (event: ChangeEvent<HTMLInputElement>) => {
-  //   setTagValue(event.target.value);
-  // };
-  // const handleNextStepChange = (event: ChangeEvent<HTMLInputElement>) => {
-  //   setNextStepValue(event.target.value);
-  // };
   const handleSelectCamChange = (event: SelectChangeEvent) => {
     setChoosenCam(event.target.value as string);
   };
@@ -140,22 +105,6 @@ function App() {
       u8arr[n] = bstr.charCodeAt(n);
     }
     return new Blob([u8arr], { type: mime });
-  };
-
-  const OpenCamera = () => {
-    if (showCam) {
-      setShowCam(false);
-    } else {
-      setShowCam(true);
-    }
-  };
-
-  //fonction pour revenir au menu
-  const backRoot = () => {
-    setIsStreaming(false);
-    image.current = null;
-    setConditionRespected(false);
-    setShowCam(false);
   };
 
   //fonction pour envoyer l'image à l'API
@@ -197,104 +146,6 @@ function App() {
     document.body.style.backgroundColor = "";
   }
 
-  // return (
-  //   <>
-  //     <Webcam
-  //       audio={false}
-  //       height={720}
-  //       width={1280}
-  //       ref={videoRef}
-
-  //     />
-  //     <img src={image.current!} hidden={!showCam}></img>
-  //     {!isStreaming ? (
-  //       <>
-  //         <Header />
-  //         <Form
-  //           urlValue={urlValue}
-  //           handleUrlChange={handleUrlChange}
-  //           keyValue={keyValue}
-  //           handleKeyChange={handleKeyChange}
-  //           tagValue={tagValue}
-  //           handleTagChange={handleTagChange}
-  //           temperature={temperature}
-  //           handleChange={handleChange}
-  //           nextStepValue={nextStepValue}
-  //           handleNextStepChange={handleNextStepChange}
-  //           setIsStreaming={setIsStreaming}
-  //         />
-  //       </>
-  //     ) : (
-  //       <>
-  //         <Button
-  //           variant="contained"
-  //           sx={{
-  //             backgroundColor: "#7bbaff",
-  //             fontWeight: "bold",
-  //             mt: "2rem",
-  //             mr: "1rem",
-  //           }}
-  //           onClick={backRoot}
-  //         >
-  //           back
-  //         </Button>
-  //         <Button
-  //           variant="contained"
-  //           sx={{
-  //             backgroundColor: "#7bbaff",
-  //             fontWeight: "bold",
-  //             mt: "2rem",
-  //           }}
-  //           onClick={OpenCamera}
-  //         >
-  //           📸
-  //         </Button>
-
-  //         <Select
-  //           labelId="demo-simple-select-label"
-  //           id="demo-simple-select"
-  //           value={choosenCam}
-  //           label="Webcam"
-  //           onChange={handleSelectCamChange}
-  //         >
-  //           {webcams?.map((camInfo) => {
-  //             return <MenuItem key={camInfo.deviceId} value={camInfo.deviceId}>{camInfo.label}</MenuItem>
-  //           })}
-
-  //         </Select>
-  //       </>
-  //     )}
-
-  //     {image.current && isStreaming ? (
-  //       <>
-  //         {conditionRespected ? (
-  //           <h1>
-  //             <a href={nextStepValue}>
-  //               <Button
-  //                 variant="contained"
-  //                 sx={{
-  //                   backgroundColor: "#7bbaff",
-  //                   fontWeight: "bold",
-  //                 }}
-  //               >
-  //                 Next
-  //               </Button>
-  //               <br></br>
-  //               <br></br>
-  //             </a>
-  //             ✅
-  //           </h1>
-  //         ) : (
-  //           <>
-  //             <h1>❌</h1>
-  //           </>
-  //         )}
-  //       </>
-  //     ) : (
-  //       <p></p>
-  //     )}
-  //   </>
-  // );
 
   return (
     <div>
