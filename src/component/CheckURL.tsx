@@ -200,7 +200,7 @@ function CheckURL() {
         <>
           <h2>
             {searchParams.get("TAG")
-              ? "no " + searchParams.get("TAG") + " detected"
+              ? "no" + searchParams.get("TAG") + "detected"
               : "put a tag in the URL"}
             {}
           </h2>
