@@ -147,21 +147,13 @@ function CheckURL() {
       });
     }
   };
-  function startBlinking() {
-    document.body.classList.add('blink');
-  }
-  
-  // Fonction pour arrêter le clignotement
-  function stopBlinking() {
-    document.body.classList.remove('blink');
-  }
 
+  if (!conditionRespected) {
+    document.body.style.backgroundColor = "#E74C3C";
 
-if (!conditionRespected) {
-  startBlinking();
-} else {
-  stopBlinking();
-}
+  } else {
+    document.body.style.backgroundColor = "";
+  }
 
 
   return (
