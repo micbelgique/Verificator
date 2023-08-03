@@ -12,17 +12,10 @@ interface Prediction {
 
 function App() {
   const searchParams = new URLSearchParams(document.location.search)
-  
-
-
   const [isStreaming, setIsStreaming] = useState(true);
   const [conditionRespected, setConditionRespected] = useState(false);
-
-
   const videoRef = useRef<Webcam>(null);
-
   const image = useRef<string | null | undefined>(null)
-
   const intervalRef = useRef<number | undefined>(undefined);
   const [webcams, setWebCams] = useState<MediaDeviceInfo[]>();
   const [choosenCam, setChoosenCam] = useState<string>();
@@ -33,8 +26,6 @@ function App() {
       const tabCams: MediaDeviceInfo[] = result.filter((infos) => infos.kind === "videoinput")
       setWebCams(tabCams)
       setChoosenCam(tabCams[0].deviceId)
-      // console.log(tabCams[0].deviceId)
-
     });
   }, [])
 
