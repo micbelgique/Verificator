@@ -159,7 +159,9 @@ function App() {
           audio={false}
           height={720}
           width={1280}
-          ref={videoRef} />
+          ref={videoRef}
+          className="hidden-video" />
+          
           <Select
             labelId="demo-simple-select-label"
             id="demo-simple-select"
