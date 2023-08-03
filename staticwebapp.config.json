@@ -2,6 +2,10 @@
     "mimeTypes": {
       ".ts": "application/javascript",
       ".tsx": "application/javascript"
+    },
+    "navigationFallback": {
+        "rewrite": "/index.html"
+      
     }
 }
   
