@@ -39,7 +39,7 @@ function App() {
       }
     };
 
-    if (isStreaming && !conditionRespected && videoRef.current) {
+    if (isStreaming && videoRef.current) {
       navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
 
         videoRef.current!.video!.srcObject = stream;
@@ -72,7 +72,7 @@ function App() {
       captureImage();
       checkVideo();
 
-    }, 500);
+    }, 2000);
 
     // Nettoyer l'intervalle lorsque le composant est démonté
     return () => {
@@ -96,6 +96,9 @@ function App() {
   const handleSelectCamChange = (event: SelectChangeEvent) => {
     setChoosenCam(event.target.value as string);
   };
+  const toggleCameraVisibility = () => {
+    setShowCam((prevShowCam) => !prevShowCam);
+  };
 
   //fonction pour convertir l'image en blob
   const dataUrlToFile = (dataUrl: string) => {
@@ -117,7 +120,7 @@ function App() {
     let keyValue = searchParams.get('KEY') ?? "";
     let tagValue = searchParams.get('TAG') ?? "";
     let temperature = parseFloat(searchParams.get('TEMP') ?? "75");
-
+    let foundGoodPrediction = false;
 
     if (image.current && conditionRespected === false) {
       console.log(urlValue)
@@ -137,6 +140,10 @@ function App() {
           prediction.tagName == tagValue
         ) {
           setConditionRespected(true);
+          foundGoodPrediction=true
+        }
+        if (!foundGoodPrediction) {
+          setConditionRespected(false);
         }
       });
     }
@@ -155,12 +162,25 @@ function App() {
       <Header />
 
       {choosenCam !== undefined &&
-        <><Webcam
-          audio={false}
-          height={720}
-          width={1280}
-          ref={videoRef}
-          className="hidden-video" />
+
+        <>
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: "#7bbaff",
+              fontWeight: "bold",
+            }}
+            onClick={toggleCameraVisibility}
+          >
+            🎥
+          </Button>
+          <br/>
+          <Webcam
+            audio={false}
+            height={720}
+            width={1280}
+            ref={videoRef}
+            className={showCam ? "" : "hidden-video"} />
 
           <Select
             labelId="demo-simple-select-label"
@@ -181,7 +201,7 @@ function App() {
             title="Redirection"
             src={searchParams.get('REDIRECT') ?? ""}>
           </iframe>
-          <br/>
+          <br />
           <a href={searchParams.get('REDIRECT') ?? ""}>
             <Button
               variant="contained"
@@ -192,13 +212,13 @@ function App() {
             >
               Next
             </Button>
-            
+
           </a>
         </h1>
       ) : (
         <>
-          <h1>❌</h1>
-          <CircularProgress />
+          <h2>{searchParams.get('TAG') ? "Aucun(e) " + searchParams.get('TAG') + " détecté(e)(s)" : "Insérez un tag dans l'URL"}
+            { }</h2>
         </>
       )}
     </div>
