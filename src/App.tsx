@@ -1,6 +1,7 @@
 import "./App.css";
 import { Button, CircularProgress, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { useState, useEffect, useRef } from "react";
+import Header from "./component/Header";
 import Webcam from "react-webcam";
 
 
@@ -14,6 +15,7 @@ function App() {
   const searchParams = new URLSearchParams(document.location.search)
   const [isStreaming, setIsStreaming] = useState(true);
   const [conditionRespected, setConditionRespected] = useState(false);
+  const [showCam, setShowCam] = useState(false);
   const videoRef = useRef<Webcam>(null);
   const image = useRef<string | null | undefined>(null)
   const intervalRef = useRef<number | undefined>(undefined);
@@ -59,12 +61,9 @@ function App() {
     if (context != null) {
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       const imageDataURL = canvas.toDataURL("image/png");
-
       image.current = imageDataURL
 
     }
-
-
   };
 
   useEffect(() => {
@@ -81,6 +80,19 @@ function App() {
     };
   }, [isStreaming]);
 
+  //fonctions pour récupérer les valeurs des inputs
+  // const handleUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
+  //   setUrlValue(event.target.value);
+  // };
+  // const handleKeyChange = (event: ChangeEvent<HTMLInputElement>) => {
+  //   setKeyValue(event.target.value);
+  // };
+  // const handleTagChange = (event: ChangeEvent<HTMLInputElement>) => {
+  //   setTagValue(event.target.value);
+  // };
+  // const handleNextStepChange = (event: ChangeEvent<HTMLInputElement>) => {
+  //   setNextStepValue(event.target.value);
+  // };
   const handleSelectCamChange = (event: SelectChangeEvent) => {
     setChoosenCam(event.target.value as string);
   };
@@ -131,7 +143,7 @@ function App() {
   };
 
   if (conditionRespected) {
-    document.body.style.backgroundColor = "rgba(181, 251, 179, 0.87)";
+    document.body.style.backgroundColor = "";
 
   } else {
     document.body.style.backgroundColor = "";
@@ -140,6 +152,7 @@ function App() {
 
   return (
     <div>
+      <Header />
       
       {choosenCam !== undefined &&
         <><Webcam

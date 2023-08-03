@@ -1,11 +1,11 @@
-import micLogo from "/MIC.svg";
+
 
 function Header() {
   return (
     <header>
-      <a href="https://www.mic-belgique.be/" target="_blank">
-        <img src={micLogo} className="logo" alt="Vite logo" />
-      </a>
+     <div className="Home">
+     <h1>Verificator</h1>
+     </div>
     </header>
   );
 }
