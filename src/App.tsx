@@ -3,7 +3,7 @@ import Header from "./component/Header";
 import CheckURL from "./component/CheckURL";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Form from "./component/Form";
-// import Footer from "./component/Footer";
+import Footer from "./component/Footer";
 
 function App() {
   return (
@@ -15,7 +15,7 @@ function App() {
           <Route path="/setting" element={<CheckURL />} />
         </Routes>
       </Router>
-      {/* <Foote /> */}
+      <Footer />
     </div>
   );
 }
