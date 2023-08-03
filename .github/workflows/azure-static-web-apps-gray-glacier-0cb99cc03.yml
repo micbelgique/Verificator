@@ -32,7 +32,7 @@ jobs:
           api_location: "" # Api source code path - optional
           output_location: "dist" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
-          app_build_timeout_seconds: 2800
+          app_build_timeout_seconds: 1800
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
