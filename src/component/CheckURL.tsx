@@ -147,8 +147,21 @@ function CheckURL() {
       });
     }
   };
+  function startBlinking() {
+    document.body.classList.add('blink');
+  }
+  
+  // Fonction pour arrêter le clignotement
+  function stopBlinking() {
+    document.body.classList.remove('blink');
+  }
 
 
+if (!conditionRespected) {
+  startBlinking();
+} else {
+  stopBlinking();
+}
 
 
   return (
@@ -207,8 +220,8 @@ function CheckURL() {
         </h1>
       ) : (
         <>
-          <h2>⚠️{searchParams.get('TAG') ? "Aucun(e) " + searchParams.get('TAG') + " détecté(e)(s)" : "Insérez un tag dans l'URL"}
-            { }⚠️</h2>
+          <h2>{searchParams.get('TAG') ? "Aucun(e) " + searchParams.get('TAG') + " détecté(e)(s)" : "Insérez un tag dans l'URL"}
+            { }</h2>
         </>
       )}
     </div>

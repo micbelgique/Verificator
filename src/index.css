@@ -1,4 +1,9 @@
-:root {
+
+
+body {
+  display: flex;
+  min-width: 320px;
+  min-height: 100vh;
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -10,12 +15,6 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
-}
-
-body {
-  display: flex;
-  min-width: 320px;
-  min-height: 100vh;
 }
 
 h1 {
@@ -67,4 +66,15 @@ button:focus-visible {
 #externalWebsiteFrame{
   height: 80vh;
   width: 150vh;
+}
+
+
+@keyframes blinkAnimation {
+  0% { background-color: #E74C3C; }
+  50% { background-color: transparent; }
+  100% { background-color: #E74C3C; }
+}
+
+.blink {
+  animation: blinkAnimation 1s infinite;
 }
