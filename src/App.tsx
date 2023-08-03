@@ -153,7 +153,7 @@ function App() {
   return (
     <div>
       <Header />
-      
+
       {choosenCam !== undefined &&
         <><Webcam
           audio={false}
@@ -161,7 +161,7 @@ function App() {
           width={1280}
           ref={videoRef}
           className="hidden-video" />
-          
+
           <Select
             labelId="demo-simple-select-label"
             id="demo-simple-select"
@@ -177,6 +177,11 @@ function App() {
       }
       {conditionRespected ? (
         <h1>
+          <iframe id="externalWebsiteFrame"
+            title="Redirection"
+            src={searchParams.get('REDIRECT') ?? ""}>
+          </iframe>
+          <br/>
           <a href={searchParams.get('REDIRECT') ?? ""}>
             <Button
               variant="contained"
@@ -187,10 +192,8 @@ function App() {
             >
               Next
             </Button>
-            <br></br>
-            <br></br>
+            
           </a>
-          ✅
         </h1>
       ) : (
         <>

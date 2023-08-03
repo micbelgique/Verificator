@@ -63,3 +63,8 @@ button:focus-visible {
   visibility: hidden;
   
 }
+
+#externalWebsiteFrame{
+  height: 80vh;
+  width: 150vh;
+}
