@@ -6,7 +6,7 @@ export default function Footer() {
     <footer className="footer">
       <Box
         sx={{
-          mt: "15rem",
+          mt: "2rem",
           mb: 0.4,
         }}
       >
