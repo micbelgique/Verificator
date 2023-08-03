@@ -1,8 +1,6 @@
-
 import { Button, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { useState, useEffect, useRef } from "react";
 import Webcam from "react-webcam";
-
 
 interface Prediction {
   probability: number;
@@ -11,12 +9,12 @@ interface Prediction {
 }
 
 function CheckURL() {
-  const searchParams = new URLSearchParams(document.location.search)
+  const searchParams = new URLSearchParams(document.location.search);
   const [isStreaming, setIsStreaming] = useState(true);
   const [conditionRespected, setConditionRespected] = useState(false);
   const [showCam, setShowCam] = useState(false);
   const videoRef = useRef<Webcam>(null);
-  const image = useRef<string | null | undefined>(null)
+  const image = useRef<string | null | undefined>(null);
   const intervalRef = useRef<number | undefined>(undefined);
   const [webcams, setWebCams] = useState<MediaDeviceInfo[]>();
   const [choosenCam, setChoosenCam] = useState<string>();
@@ -24,44 +22,42 @@ function CheckURL() {
   //initialisation liste des camera
   useEffect(() => {
     navigator.mediaDevices.enumerateDevices().then((result) => {
-      const tabCams: MediaDeviceInfo[] = result.filter((infos) => infos.kind === "videoinput")
-      setWebCams(tabCams)
-      setChoosenCam(tabCams[0].deviceId)
+      const tabCams: MediaDeviceInfo[] = result.filter(
+        (infos) => infos.kind === "videoinput"
+      );
+      setWebCams(tabCams);
+      setChoosenCam(tabCams[0].deviceId);
     });
-  }, [])
+  }, []);
 
   //stream de la webcam
   useEffect(() => {
     const constraints = {
       video: {
-        deviceId: { exact: choosenCam }
-      }
+        deviceId: { exact: choosenCam },
+      },
     };
 
     if (isStreaming && videoRef.current) {
       navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-
         videoRef.current!.video!.srcObject = stream;
-
       });
     }
   }, [isStreaming, choosenCam]);
 
   // Méthode pour capturer une image depuis le flux vidéo
   const captureImage = () => {
+    const video = videoRef.current?.video!;
 
-    const video = videoRef.current?.video!
-
-    const canvas: HTMLCanvasElement = document.createElement('canvas');
+    const canvas: HTMLCanvasElement = document.createElement("canvas");
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext("2d");
     if (context != null) {
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       const imageDataURL = canvas.toDataURL("image/png");
-      image.current = imageDataURL
-
+      image.current = imageDataURL;
     }
   };
 
@@ -70,7 +66,6 @@ function CheckURL() {
     intervalRef.current = setInterval(() => {
       captureImage();
       checkVideo();
-
     }, 2000);
 
     // Nettoyer l'intervalle lorsque le composant est démonté
@@ -79,19 +74,6 @@ function CheckURL() {
     };
   }, [isStreaming]);
 
-  //fonctions pour récupérer les valeurs des inputs
-  // const handleUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
-  //   setUrlValue(event.target.value);
-  // };
-  // const handleKeyChange = (event: ChangeEvent<HTMLInputElement>) => {
-  //   setKeyValue(event.target.value);
-  // };
-  // const handleTagChange = (event: ChangeEvent<HTMLInputElement>) => {
-  //   setTagValue(event.target.value);
-  // };
-  // const handleNextStepChange = (event: ChangeEvent<HTMLInputElement>) => {
-  //   setNextStepValue(event.target.value);
-  // };
   const handleSelectCamChange = (event: SelectChangeEvent) => {
     setChoosenCam(event.target.value as string);
   };
@@ -115,14 +97,14 @@ function CheckURL() {
   //fonction pour envoyer l'image à l'API
   const checkVideo = async () => {
     setIsStreaming(true);
-    let urlValue = searchParams.get('URL') ?? "";
-    let keyValue = searchParams.get('KEY') ?? "";
-    let tagValue = searchParams.get('TAG') ?? "";
-    let temperature = parseFloat(searchParams.get('TEMP') ?? "75");
+    let urlValue = searchParams.get("URL") ?? "";
+    let keyValue = searchParams.get("KEY") ?? "";
+    let tagValue = searchParams.get("TAG") ?? "";
+    let temperature = parseFloat(searchParams.get("TEMP") ?? "75");
     let foundGoodPrediction = false;
 
     if (image.current && conditionRespected === false) {
-      console.log(urlValue)
+      console.log(urlValue);
       const response = await fetch(urlValue, {
         method: "Post",
         headers: {
@@ -139,7 +121,7 @@ function CheckURL() {
           prediction.tagName == tagValue
         ) {
           setConditionRespected(true);
-          foundGoodPrediction=true
+          foundGoodPrediction = true;
         }
         if (!foundGoodPrediction) {
           setConditionRespected(false);
@@ -150,15 +132,13 @@ function CheckURL() {
 
   if (!conditionRespected) {
     document.body.style.backgroundColor = "#E74C3C";
-
   } else {
     document.body.style.backgroundColor = "";
   }
 
-
   return (
     <div>
-      {choosenCam !== undefined &&
+      {choosenCam !== undefined && (
         <>
           <Button
             variant="contained"
@@ -170,13 +150,14 @@ function CheckURL() {
           >
             🎥
           </Button>
-          <br/>
+          <br />
           <Webcam
             audio={false}
             height={720}
             width={1280}
             ref={videoRef}
-            className={showCam ? "" : "hidden-video"} />
+            className={showCam ? "" : "hidden-video"}
+          />
 
           <Select
             labelId="demo-simple-select-label"
@@ -186,19 +167,24 @@ function CheckURL() {
             onChange={handleSelectCamChange}
           >
             {webcams?.map((camInfo) => {
-              return <MenuItem key={camInfo.deviceId} value={camInfo.deviceId}>{camInfo.label}</MenuItem>;
+              return (
+                <MenuItem key={camInfo.deviceId} value={camInfo.deviceId}>
+                  {camInfo.label}
+                </MenuItem>
+              );
             })}
-
-          </Select></>
-      }
+          </Select>
+        </>
+      )}
       {conditionRespected ? (
         <h1>
-          <iframe id="externalWebsiteFrame"
+          <iframe
+            id="externalWebsiteFrame"
             title="Redirection"
-            src={searchParams.get('REDIRECT') ?? ""}>
-          </iframe>
+            src={searchParams.get("REDIRECT") ?? ""}
+          ></iframe>
           <br />
-          <a href={searchParams.get('REDIRECT') ?? ""}>
+          <a href={searchParams.get("REDIRECT") ?? ""}>
             <Button
               variant="contained"
               sx={{
@@ -212,8 +198,12 @@ function CheckURL() {
         </h1>
       ) : (
         <>
-          <h2>{searchParams.get('TAG') ? "Aucun(e) " + searchParams.get('TAG') + " détecté(e)(s)" : "Insérez un tag dans l'URL"}
-            { }</h2>
+          <h2>
+            {searchParams.get("TAG")
+              ? "no" + searchParams.get("TAG") + "detected"
+              : "put a tag in the URL"}
+            {}
+          </h2>
         </>
       )}
     </div>

@@ -10,6 +10,7 @@ function App() {
       <Header />
       <Router>
         <Routes>
+        <Route path="/" element={<Form/>} />
           <Route path="/setting" element={<CheckURL />} />
         </Routes>
       </Router>

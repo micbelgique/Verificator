@@ -1,111 +1,97 @@
-import { TextField, Button, Container, Slider, Typography } from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { ChangeEvent } from "react";
+import {
+  TextField,
+  Button,
+  Container,
+  Slider,
+  Typography,
+} from "@mui/material";
 
-interface FormProps {
-  urlValue: string;
-  handleUrlChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  keyValue: string;
-  handleKeyChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  tagValue: string;
-  handleTagChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  temperature: number;
-  handleChange: (_event: Event, newValue: number | number[]) => void;
-  nextStepValue: string;
-  handleNextStepChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  // checkVideo: () => void;
-  setIsStreaming: (value : boolean) => void;
-}
+import { useState } from "react";
 
-const theme = createTheme({
-  palette: {
-    mode: "dark",
-    primary: {
-      main: "#90caf9",
-    },
-    secondary: {
-      main: "#f48fb1",
-    },
-  },
-});
+function Form() {
+  const [temperature, setTemperature] = useState<number>(75);
+  const [urlField, setUrlField] = useState<string>();
+  const [keyField, setKeyField] = useState<string>();
+  const [tagField, setTagField] = useState<string>();
+  const [nextStepField, setNextStepField] = useState<string>();
 
-function Form({
-  urlValue,
-  handleUrlChange,
-  keyValue,
-  handleKeyChange,
-  tagValue,
-  handleTagChange,
-  temperature,
-  handleChange,
-  nextStepValue,
-  handleNextStepChange,
-  setIsStreaming,
-}: FormProps) {
+  const handleButtonClick = () => {
+    // Create the URL with form data as parameters
+    if(!urlField || !keyField || !tagField || !nextStepField) return;
+    const url = new URL("https://gray-glacier-0cb99cc03.3.azurestaticapps.net/setting");
+    url.searchParams.set("URL", urlField);
+    url.searchParams.set("KEY", keyField);
+    url.searchParams.set("TAG", tagField);
+    url.searchParams.set("TEMP", temperature.toString());
+    url.searchParams.set("REDIRECT", nextStepField);
+
+    console.log(url.toString());
+
+    // Redirect to the new URL
+    window.location.href = url.toString();
+  };
+
   return (
     <Container sx={{ display: "flex", flexDirection: "column", mt: "6rem" }}>
-      <ThemeProvider theme={theme}>
-        <TextField
-          fullWidth
-          id="urlField"
-          label="Url"
-          variant="standard"
-          value={urlValue}
-          onChange={handleUrlChange}
-        />
-        <TextField
-          fullWidth
-          id="keyField"
-          label="Key"
-          variant="standard"
-          value={keyValue}
-          onChange={handleKeyChange}
-        />
-        <TextField
-          id="tagField"
-          label="Tag"
-          variant="standard"
-          value={tagValue}
-          onChange={handleTagChange}
-        />
+      <TextField
+        fullWidth
+        id="urlField"
+        label="Url"
+        variant="standard"
+        onChange={(e) => setUrlField(e.target.value)}
+        required
+      />
+      <TextField
+        fullWidth
+        id="keyField"
+        label="Key"
+        variant="standard"
+        onChange={(e) => setKeyField(e.target.value)}
+        required
+      />
+      <TextField
+        id="tagField"
+        label="Tag"
+        variant="standard"
+        onChange={(e) => setTagField(e.target.value)}
+        required
+      />
 
-        <Typography sx={{ color: "currentColor", padding: "8px 0 5px", m: "0" }}>
-          Confidence: {temperature}
-        </Typography>
+      <Typography sx={{ color: "currentColor", padding: "8px 0 5px", m: "0" }}>
+        Confidence:{temperature}
+      </Typography>
 
-        <Slider
-          sx={{
-            color: "#7bbaff",
-          }}
-          aria-label="Temperature"
-          defaultValue={30}
-          value={temperature}
-          onChange={handleChange}
-          step={1}
-          marks
-          min={0}
-          max={100}
-        />
+      <Slider
+        sx={{
+          color: "#7bbaff",
+        }}
+        aria-label="Temperature"
+        defaultValue={30}
+        step={1}
+        marks
+        min={0}
+        max={100}
+        onChange={(e, newValue) => setTemperature(newValue as number)}
+      />
 
-        <TextField
-          id="nextStep"
-          label="Next Step"
-          variant="standard"
-          value={nextStepValue}
-          onChange={handleNextStepChange}
-        />
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: "#7bbaff",
-            fontWeight: "bold",
-            mt: "2rem",
-          }}
-          onClick={() => setIsStreaming(true)}
-        >
-          Check
-        </Button>
-      </ThemeProvider>
+      <TextField
+        id="nextStep"
+        label="Next Step"
+        variant="standard"
+        onChange={(e) => setNextStepField(e.target.value)}
+        required
+      />
+      <Button
+        variant="contained"
+        sx={{
+          backgroundColor: "#7bbaff",
+          fontWeight: "bold",
+          mt: "2rem",
+        }}
+        onClick={handleButtonClick}
+      >
+        Submit
+      </Button>
     </Container>
   );
 }
