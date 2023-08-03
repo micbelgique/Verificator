@@ -17,8 +17,10 @@ function Form() {
 
   const handleButtonClick = () => {
     // Create the URL with form data as parameters
-    if(!urlField || !keyField || !tagField || !nextStepField) return;
-    const url = new URL("https://gray-glacier-0cb99cc03.3.azurestaticapps.net/setting");
+    if (!urlField || !keyField || !tagField || !nextStepField) return;
+    const url = new URL(
+      "https://gray-glacier-0cb99cc03.3.azurestaticapps.net/setting"
+    );
     url.searchParams.set("URL", urlField);
     url.searchParams.set("KEY", keyField);
     url.searchParams.set("TAG", tagField);
@@ -79,7 +81,6 @@ function Form() {
         label="Next Step"
         variant="standard"
         onChange={(e) => setNextStepField(e.target.value)}
-        required
       />
       <Button
         variant="contained"
