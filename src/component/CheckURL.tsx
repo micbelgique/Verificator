@@ -148,12 +148,7 @@ function CheckURL() {
     }
   };
 
-  if (conditionRespected) {
-    document.body.style.backgroundColor = "";
 
-  } else {
-    document.body.style.backgroundColor = "";
-  }
 
 
   return (
@@ -212,8 +207,8 @@ function CheckURL() {
         </h1>
       ) : (
         <>
-          <h2>{searchParams.get('TAG') ? "Aucun(e) " + searchParams.get('TAG') + " détecté(e)(s)" : "Insérez un tag dans l'URL"}
-            { }</h2>
+          <h2>⚠️{searchParams.get('TAG') ? "Aucun(e) " + searchParams.get('TAG') + " détecté(e)(s)" : "Insérez un tag dans l'URL"}
+            { }⚠️</h2>
         </>
       )}
     </div>
