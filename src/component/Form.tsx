@@ -73,7 +73,7 @@ function Form() {
         marks
         min={0}
         max={100}
-        onChange={(e, newValue) => setTemperature(newValue as number)}
+        onChange={(_e, newValue) => setTemperature(newValue as number)}
       />
 
       <TextField
