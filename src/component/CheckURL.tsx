@@ -8,11 +8,20 @@ interface Prediction {
   tagName: string;
 }
 
+//fonction pour recuperer un tableau de mot séparé par une virgule
+const splitString = (splitableString: string) : string[] =>{
+
+  if(splitableString === "") return [];
+  if(!splitableString.includes(',')) return [splitableString];
+  return splitableString.split(',');
+
+}
+
 function CheckURL() {
   const searchParams = new URLSearchParams(document.location.search);
   const [urlValue] = useState(searchParams.get("URL") ?? "");
   const [keyValue] = useState(searchParams.get("KEY") ?? "");
-  const [tagValue] = useState(searchParams.get("TAG") ?? "");
+  const [tagValue] = useState(splitString(searchParams.get("TAG") ?? ""));
   const [temperature] = useState(parseFloat(searchParams.get("TEMP") ?? "75"));
   const [redirect] = useState(searchParams.get("REDIRECT") ?? "");
   const [isStreaming, setIsStreaming] = useState(true);
@@ -49,6 +58,8 @@ function CheckURL() {
       });
     }
   }, [isStreaming, choosenCam]);
+
+  
 
   // Méthode pour capturer une image depuis le flux vidéo
   const captureImage = () => {
@@ -123,7 +134,7 @@ function CheckURL() {
       data.predictions.forEach((prediction: Prediction) => {
         if (
           prediction.probability > temperature / 100 &&
-          prediction.tagName == tagValue
+          tagValue.includes(prediction.tagName)
         ) {
           setConditionRespected(true);
           foundGoodPrediction = true;
@@ -205,9 +216,9 @@ function CheckURL() {
         <>
           <h2>
             {tagValue
-              ? "no" + tagValue + "detected"
+              ? tagValue.map((tag) =>"finding " + tag + "\n")
               : "put a tag in the URL"}
-            {}
+            
           </h2>
         </>
       )}
