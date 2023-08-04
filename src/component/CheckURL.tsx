@@ -10,6 +10,11 @@ interface Prediction {
 
 function CheckURL() {
   const searchParams = new URLSearchParams(document.location.search);
+  const [urlValue] = useState(searchParams.get("URL") ?? "");
+  const [keyValue] = useState(searchParams.get("KEY") ?? "");
+  const [tagValue] = useState(searchParams.get("TAG") ?? "");
+  const [temperature] = useState(parseFloat(searchParams.get("TEMP") ?? "75"));
+  const [redirect] = useState(searchParams.get("REDIRECT") ?? "");
   const [isStreaming, setIsStreaming] = useState(true);
   const [conditionRespected, setConditionRespected] = useState(false);
   const [showCam, setShowCam] = useState(false);
@@ -97,10 +102,10 @@ function CheckURL() {
   //fonction pour envoyer l'image à l'API
   const checkVideo = async () => {
     setIsStreaming(true);
-    let urlValue = searchParams.get("URL") ?? "";
-    let keyValue = searchParams.get("KEY") ?? "";
-    let tagValue = searchParams.get("TAG") ?? "";
-    let temperature = parseFloat(searchParams.get("TEMP") ?? "75");
+    // let urlValue = searchParams.get("URL") ?? "";
+    // let keyValue = searchParams.get("KEY") ?? "";
+    // let tagValue = searchParams.get("TAG") ?? "";
+    // let temperature = parseFloat(searchParams.get("TEMP") ?? "75");
     let foundGoodPrediction = false;
 
     if (image.current && conditionRespected === false) {
@@ -181,10 +186,10 @@ function CheckURL() {
           <iframe
             id="externalWebsiteFrame"
             title="Redirection"
-            src={searchParams.get("REDIRECT") ?? ""}
+            src={redirect}
           ></iframe>
           <br />
-          <a href={searchParams.get("REDIRECT") ?? ""}>
+          <a href={redirect}>
             <Button
               variant="contained"
               sx={{
@@ -199,8 +204,8 @@ function CheckURL() {
       ) : (
         <>
           <h2>
-            {searchParams.get("TAG")
-              ? "no" + searchParams.get("TAG") + "detected"
+            {tagValue
+              ? "no" + tagValue + "detected"
               : "put a tag in the URL"}
             {}
           </h2>

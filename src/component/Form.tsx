@@ -19,7 +19,7 @@ function Form() {
     // Create the URL with form data as parameters
     if (!urlField || !keyField || !tagField || !nextStepField) return;
     const url = new URL(
-      "https://gray-glacier-0cb99cc03.3.azurestaticapps.net/setting"
+      "http://localhost:5173/setting"
     );
     url.searchParams.set("URL", urlField);
     url.searchParams.set("KEY", keyField);
