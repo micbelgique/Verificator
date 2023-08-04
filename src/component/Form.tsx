@@ -21,17 +21,19 @@ function Form() {
     url.searchParams.set("URL", encodeURIComponent(urlField));
     url.searchParams.set("KEY", keyField);
     url.searchParams.set("TAG", formData.map((data) => data.tag).join(";"));
-    url.searchParams.set(
-      "NEXT_STEP",
-      formData.map((data) =>  encodeURIComponent(data.nextStep)).join(";")
-    );
     url.searchParams.set("TEMP", temperature.toString());
+    url.searchParams.set(
+    "REDIRECT",
+      formData.map((data) => encodeURIComponent(data.nextStep)).join(";")
+      
+    );
 
-    console.log(url.toString());
+    
 
     window.location.href = url.toString();
   };
 
+  
   const handleAddInput = () => {
     setFormData([...formData, { tag: "", nextStep: "" }]);
   };
