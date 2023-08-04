@@ -229,8 +229,8 @@ function CheckURL() {
         <>
           <h2>
             {tagValue
-              ? tagValue.map((tag) =>"finding " + tag + "\n")
-              : "put a tag in the URL"}
+              ? "Nothing detected"
+              : "Put a tag in the URL"}
             
           </h2>
         </>
