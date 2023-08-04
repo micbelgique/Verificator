@@ -21,11 +21,11 @@ function Form() {
     const url = new URL(
       "http://localhost:5173/setting"
     );
-    url.searchParams.set("URL", urlField);
+    url.searchParams.set("URL", encodeURIComponent(urlField));
     url.searchParams.set("KEY", keyField);
     url.searchParams.set("TAG", tagField);
     url.searchParams.set("TEMP", temperature.toString());
-    url.searchParams.set("REDIRECT", nextStepField);
+    url.searchParams.set("REDIRECT", encodeURIComponent(nextStepField));
 
     console.log(url.toString());
 
