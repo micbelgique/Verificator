@@ -2,6 +2,8 @@ import { Button, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { useState, useEffect, useRef } from "react";
 import Webcam from "react-webcam";
 
+import CameraIcon from "@mui/icons-material/Camera";
+
 interface Prediction {
   probability: number;
   tagId: string;
@@ -9,29 +11,33 @@ interface Prediction {
 }
 
 //fonction pour recuperer un tableau de mot séparé par un ;
-const splitString = (splitableString: string) : string[] =>{
+const splitString = (splitableString: string): string[] => {
+  if (splitableString === "") return [];
+  if (!splitableString.includes(";")) return [splitableString];
+  return splitableString.split(";");
+};
 
-  if(splitableString === "") return [];
-  if(!splitableString.includes(';')) return [splitableString];
-  return splitableString.split(';');
-
-}
-
-const decodeListOfUrl =(urls : string[]): string[]=>{
+const decodeListOfUrl = (urls: string[]): string[] => {
   return urls.map((url) => decodeURIComponent(url));
-}
+};
 
-const splitAndDecodeURls = (urlString : string) : string[] =>{
+const splitAndDecodeURls = (urlString: string): string[] => {
   return decodeListOfUrl(splitString(urlString));
-}
+};
 
 function CheckURL() {
   const searchParams = new URLSearchParams(document.location.search);
-  const [urlValue] = useState(decodeURIComponent(searchParams.get("URL") ?? ""));
+  const [urlValue] = useState(
+    decodeURIComponent(searchParams.get("URL") ?? "")
+  );
   const [keyValue] = useState(searchParams.get("KEY") ?? "");
-  const [tagValue] = useState<string[]>(splitString(searchParams.get("TAG") ?? ""));
+  const [tagValue] = useState<string[]>(
+    splitString(searchParams.get("TAG") ?? "")
+  );
   const [temperature] = useState(parseFloat(searchParams.get("TEMP") ?? "75"));
-  const [redirect] = useState<string[]>(splitAndDecodeURls(searchParams.get("REDIRECT") ?? ""));
+  const [redirect] = useState<string[]>(
+    splitAndDecodeURls(searchParams.get("REDIRECT") ?? "")
+  );
   const [isStreaming, setIsStreaming] = useState(true);
   const [conditionRespected, setConditionRespected] = useState(false);
   const [showCam, setShowCam] = useState(false);
@@ -41,8 +47,8 @@ function CheckURL() {
   const [webcams, setWebCams] = useState<MediaDeviceInfo[]>();
   const [choosenCam, setChoosenCam] = useState<string>();
 
-  const [currentTagIndexDetected, setCurrentTagIndexDetected] = useState<number>();
-
+  const [currentTagIndexDetected, setCurrentTagIndexDetected] =
+    useState<number>();
 
   //initialisation liste des camera
   useEffect(() => {
@@ -69,8 +75,6 @@ function CheckURL() {
       });
     }
   }, [isStreaming, choosenCam]);
-
-  
 
   // Méthode pour capturer une image depuis le flux vidéo
   const captureImage = () => {
@@ -124,10 +128,7 @@ function CheckURL() {
   //fonction pour envoyer l'image à l'API
   const checkVideo = async () => {
     setIsStreaming(true);
-    // let urlValue = searchParams.get("URL") ?? "";
-    // let keyValue = searchParams.get("KEY") ?? "";
-    // let tagValue = searchParams.get("TAG") ?? "";
-    // let temperature = parseFloat(searchParams.get("TEMP") ?? "75");
+
     let foundGoodPrediction = false;
 
     if (image.current && conditionRespected === false) {
@@ -143,14 +144,16 @@ function CheckURL() {
       const data = await response.json();
 
       data.predictions.forEach((prediction: Prediction) => {
-        if (prediction.probability > temperature / 100 && tagValue.includes(prediction.tagName)) {
-          let indexOfTag = tagValue.indexOf(prediction.tagName)
-          if(indexOfTag !== -1){
+        if (
+          prediction.probability > temperature / 100 &&
+          tagValue.includes(prediction.tagName)
+        ) {
+          let indexOfTag = tagValue.indexOf(prediction.tagName);
+          if (indexOfTag !== -1) {
             setCurrentTagIndexDetected(indexOfTag);
             setConditionRespected(true);
-          foundGoodPrediction = true;
+            foundGoodPrediction = true;
           }
-          
         }
         if (!foundGoodPrediction) {
           setConditionRespected(false);
@@ -166,34 +169,21 @@ function CheckURL() {
   }
 
   return (
-    <div>
+    <>
       {choosenCam !== undefined && (
         <>
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: "#7bbaff",
-              fontWeight: "bold",
-            }}
-            onClick={toggleCameraVisibility}
-          >
-            🎥
-          </Button>
-          <br />
-          <Webcam
-            audio={false}
-            height={720}
-            width={1280}
-            ref={videoRef}
-            className={showCam ? "" : "hidden-video"}
-          />
-
           <Select
             labelId="demo-simple-select-label"
             id="demo-simple-select"
             value={choosenCam}
             label="Webcam"
             onChange={handleSelectCamChange}
+            sx={{
+              minWidth: "200px",
+              margin: "10px",
+              backgroundColor: "#f1f1f1",
+              borderRadius: "5px", //
+            }}
           >
             {webcams?.map((camInfo) => {
               return (
@@ -203,6 +193,33 @@ function CheckURL() {
               );
             })}
           </Select>
+          <Button
+            variant="contained"
+            sx={{
+              ml: "1rem",
+              width: "2rem",
+              height: "3.4rem",
+              backgroundColor: "#f1f1f1",
+              color: "black",
+              fontWeight: "bold",
+              "&:hover": {
+                backgroundColor: "black",
+                color: "white",
+              },
+            }}
+            onClick={toggleCameraVisibility}
+          >
+            <CameraIcon />
+          </Button>
+
+          <br />
+          <Webcam
+            audio={false}
+            height={360}
+            width={740}
+            ref={videoRef}
+            className={showCam ? "" : "hidden-video"}
+          />
         </>
       )}
       {conditionRespected ? (
@@ -211,31 +228,26 @@ function CheckURL() {
             id="externalWebsiteFrame"
             title="Redirection"
             src={redirect[currentTagIndexDetected ?? 0]}
+            style={{
+              width: "50rem", // Set the desired width, e.g., "500px", "50%", etc.
+              height: "25rem", // Set the desired height
+
+              border: "none", // Optionally add border styles
+            }}
           ></iframe>
           <br />
           <a href={redirect[currentTagIndexDetected ?? 0]}>
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "#7bbaff",
-                fontWeight: "bold",
-              }}
-            >
-              Next
-            </Button>
+            <Button variant="contained">Next</Button>
           </a>
         </h1>
       ) : (
-        <>
-          <h2>
-            {tagValue
-              ? tagValue.map((tag) =>"finding " + tag + "\n")
-              : "put a tag in the URL"}
-            
-          </h2>
-        </>
+        <h2>
+          {tagValue
+            ? tagValue.map((tag) => "finding " + tag + "\n")
+            : "put a tag in the URL"}
+        </h2>
       )}
-    </div>
+    </>
   );
 }
 
