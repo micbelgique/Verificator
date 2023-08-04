@@ -8,22 +8,30 @@ interface Prediction {
   tagName: string;
 }
 
-//fonction pour recuperer un tableau de mot séparé par une virgule
+//fonction pour recuperer un tableau de mot séparé par un ;
 const splitString = (splitableString: string) : string[] =>{
 
   if(splitableString === "") return [];
-  if(!splitableString.includes(',')) return [splitableString];
-  return splitableString.split(',');
+  if(!splitableString.includes(';')) return [splitableString];
+  return splitableString.split(';');
 
+}
+
+const decodeListOfUrl =(urls : string[]): string[]=>{
+  return urls.map((url) => decodeURIComponent(url));
+}
+
+const splitAndDecodeURls = (urlString : string) : string[] =>{
+  return decodeListOfUrl(splitString(urlString));
 }
 
 function CheckURL() {
   const searchParams = new URLSearchParams(document.location.search);
-  const [urlValue] = useState(searchParams.get("URL") ?? "");
+  const [urlValue] = useState(decodeURIComponent(searchParams.get("URL") ?? ""));
   const [keyValue] = useState(searchParams.get("KEY") ?? "");
-  const [tagValue] = useState(splitString(searchParams.get("TAG") ?? ""));
+  const [tagValue] = useState<string[]>(splitString(searchParams.get("TAG") ?? ""));
   const [temperature] = useState(parseFloat(searchParams.get("TEMP") ?? "75"));
-  const [redirect] = useState(searchParams.get("REDIRECT") ?? "");
+  const [redirect] = useState<string[]>(splitAndDecodeURls(searchParams.get("REDIRECT") ?? ""));
   const [isStreaming, setIsStreaming] = useState(true);
   const [conditionRespected, setConditionRespected] = useState(false);
   const [showCam, setShowCam] = useState(false);
@@ -32,6 +40,9 @@ function CheckURL() {
   const intervalRef = useRef<number | undefined>(undefined);
   const [webcams, setWebCams] = useState<MediaDeviceInfo[]>();
   const [choosenCam, setChoosenCam] = useState<string>();
+
+  const [currentTagIndexDetected, setCurrentTagIndexDetected] = useState<number>();
+
 
   //initialisation liste des camera
   useEffect(() => {
@@ -132,12 +143,14 @@ function CheckURL() {
       const data = await response.json();
 
       data.predictions.forEach((prediction: Prediction) => {
-        if (
-          prediction.probability > temperature / 100 &&
-          tagValue.includes(prediction.tagName)
-        ) {
-          setConditionRespected(true);
+        if (prediction.probability > temperature / 100 && tagValue.includes(prediction.tagName)) {
+          let indexOfTag = tagValue.indexOf(prediction.tagName)
+          if(indexOfTag !== -1){
+            setCurrentTagIndexDetected(indexOfTag);
+            setConditionRespected(true);
           foundGoodPrediction = true;
+          }
+          
         }
         if (!foundGoodPrediction) {
           setConditionRespected(false);
@@ -197,10 +210,10 @@ function CheckURL() {
           <iframe
             id="externalWebsiteFrame"
             title="Redirection"
-            src={redirect}
+            src={redirect[currentTagIndexDetected ?? 0]}
           ></iframe>
           <br />
-          <a href={redirect}>
+          <a href={redirect[currentTagIndexDetected ?? 0]}>
             <Button
               variant="contained"
               sx={{
