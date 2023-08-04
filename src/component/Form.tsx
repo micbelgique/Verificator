@@ -5,32 +5,47 @@ import {
   Slider,
   Typography,
 } from "@mui/material";
-
 import { useState } from "react";
 
 function Form() {
   const [temperature, setTemperature] = useState<number>(75);
-  const [urlField, setUrlField] = useState<string>();
-  const [keyField, setKeyField] = useState<string>();
-  const [tagField, setTagField] = useState<string>();
-  const [nextStepField, setNextStepField] = useState<string>();
+  const [urlField, setUrlField] = useState<string>("");
+  const [keyField, setKeyField] = useState<string>("");
+  const [formData, setFormData] = useState<{ tag: string; nextStep: string }[]>(
+    [{ tag: "", nextStep: "" }]
+  );
 
   const handleButtonClick = () => {
-    // Create the URL with form data as parameters
-    if (!urlField || !keyField || !tagField || !nextStepField) return;
-    const url = new URL(
-      "https://gray-glacier-0cb99cc03.3.azurestaticapps.net/setting"
-    );
+    if (!urlField || !keyField) return;
+    const url = new URL("http://localhost:5173/setting");
     url.searchParams.set("URL", urlField);
     url.searchParams.set("KEY", keyField);
-    url.searchParams.set("TAG", tagField);
+    url.searchParams.set("TAG", formData.map((data) => data.tag).join(";"));
+    url.searchParams.set(
+      "NEXT_STEP",
+      formData.map((data) => data.nextStep).join(";")
+    );
     url.searchParams.set("TEMP", temperature.toString());
-    url.searchParams.set("REDIRECT", nextStepField);
 
     console.log(url.toString());
 
-    // Redirect to the new URL
     window.location.href = url.toString();
+  };
+
+  const handleAddInput = () => {
+    setFormData([...formData, { tag: "", nextStep: "" }]);
+  };
+
+  const handleTagChange = (index: number, value: string) => {
+    const updatedFormData = [...formData];
+    updatedFormData[index].tag = value;
+    setFormData(updatedFormData);
+  };
+
+  const handleNextStepChange = (index: number, value: string) => {
+    const updatedFormData = [...formData];
+    updatedFormData[index].nextStep = value;
+    setFormData(updatedFormData);
   };
 
   return (
@@ -51,16 +66,43 @@ function Form() {
         onChange={(e) => setKeyField(e.target.value)}
         required
       />
-      <TextField
-        id="tagField"
-        label="Tag"
-        variant="standard"
-        onChange={(e) => setTagField(e.target.value)}
-        required
-      />
+
+      {formData.map((data, index) => (
+        <div key={index} style={{ display: "flex", alignItems: "center" }}>
+          <TextField
+            id={`tagField_${index}`}
+            label="Tag"
+            variant="standard"
+            value={data.tag}
+            onChange={(e) => handleTagChange(index, e.target.value)}
+            required
+            style={{ marginRight: "1rem" }}
+          />
+
+          <TextField
+            id={`nextStep_${index}`}
+            label="Next Step"
+            variant="standard"
+            value={data.nextStep}
+            onChange={(e) => handleNextStepChange(index, e.target.value)}
+          />
+
+          {/* "+" button to add more "Tag" and "Next Step" fields */}
+          {index === formData.length - 1 && (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleAddInput}
+              sx={{ mt: "1rem" }}
+            >
+              +
+            </Button>
+          )}
+        </div>
+      ))}
 
       <Typography sx={{ color: "currentColor", padding: "8px 0 5px", m: "0" }}>
-        Confidence:{temperature}
+        Confidence: {temperature}
       </Typography>
 
       <Slider
@@ -68,7 +110,7 @@ function Form() {
           color: "#7bbaff",
         }}
         aria-label="Temperature"
-        defaultValue={30}
+        defaultValue={75}
         step={1}
         marks
         min={0}
@@ -76,12 +118,6 @@ function Form() {
         onChange={(_e, newValue) => setTemperature(newValue as number)}
       />
 
-      <TextField
-        id="nextStep"
-        label="Next Step"
-        variant="standard"
-        onChange={(e) => setNextStepField(e.target.value)}
-      />
       <Button
         variant="contained"
         sx={{
