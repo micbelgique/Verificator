@@ -59,6 +59,7 @@ function Form() {
         variant="standard"
         onChange={(e) => setUrlField(e.target.value)}
         required
+        sx={{width:"75%", ml:"10%"}}
       />
       <TextField
         fullWidth
@@ -67,10 +68,11 @@ function Form() {
         variant="standard"
         onChange={(e) => setKeyField(e.target.value)}
         required
+        sx={{width:"75%", ml:"10%"}}
       />
 
       {formData.map((data, index) => (
-        <div key={index} style={{ display: "flex", alignItems: "center" }}>
+        <div key={index} style={{ display: "flex", alignItems: "left" }}>
           <TextField
             id={`tagField_${index}`}
             label="Tag"
@@ -78,7 +80,7 @@ function Form() {
             value={data.tag}
             onChange={(e) => handleTagChange(index, e.target.value)}
             required
-            style={{ marginRight: "1rem" }}
+            sx={{ marginRight: "1rem", width:"36%", ml:"10%" }}
           />
 
           <TextField
@@ -87,6 +89,7 @@ function Form() {
             variant="standard"
             value={data.nextStep}
             onChange={(e) => handleNextStepChange(index, e.target.value)}
+            style={{width:"36%"}}
           />
 
           {/* "+" button to add more "Tag" and "Next Step" fields */}
@@ -95,7 +98,7 @@ function Form() {
               variant="contained"
               color="primary"
               onClick={handleAddInput}
-              sx={{ mt: "1rem" }}
+              sx={{ mt: "1rem", ml:"1rem"}}
             >
               +
             </Button>
