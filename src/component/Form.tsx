@@ -6,6 +6,7 @@ import {
   Typography,
 } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import { useState } from "react";
 
 function Form() {
@@ -24,19 +25,19 @@ function Form() {
     url.searchParams.set("TAG", formData.map((data) => data.tag).join(";"));
     url.searchParams.set("TEMP", temperature.toString());
     url.searchParams.set(
-    "REDIRECT",
+      "REDIRECT",
       formData.map((data) => encodeURIComponent(data.nextStep)).join(";")
-      
+
     );
-
-    
-
     window.location.href = url.toString();
   };
 
-  
+
   const handleAddInput = () => {
     setFormData([...formData, { tag: "", nextStep: "" }]);
+  };
+  const handleRemoveInput = (ind: number) => {
+    setFormData(formData.filter((_, i) => i !== ind));
   };
 
   const handleTagChange = (index: number, value: string) => {
@@ -60,7 +61,7 @@ function Form() {
         variant="standard"
         onChange={(e) => setUrlField(e.target.value)}
         required
-        sx={{width:"75%", ml:"10%"}}
+        sx={{ width: "75%", ml: "10%" }}
       />
       <TextField
         fullWidth
@@ -69,7 +70,7 @@ function Form() {
         variant="standard"
         onChange={(e) => setKeyField(e.target.value)}
         required
-        sx={{width:"75%", ml:"10%"}}
+        sx={{ width: "75%", ml: "10%" }}
       />
 
       {formData.map((data, index) => (
@@ -81,7 +82,7 @@ function Form() {
             value={data.tag}
             onChange={(e) => handleTagChange(index, e.target.value)}
             required
-            sx={{ marginRight: "1rem", width:"36%", ml:"10%" }}
+            sx={{ marginRight: "1rem", width: "36%", ml: "10%" }}
           />
 
           <TextField
@@ -90,7 +91,7 @@ function Form() {
             variant="standard"
             value={data.nextStep}
             onChange={(e) => handleNextStepChange(index, e.target.value)}
-            style={{width:"36%"}}
+            style={{ width: "36%" }}
           />
 
           {/* "+" button to add more "Tag" and "Next Step" fields */}
@@ -99,11 +100,37 @@ function Form() {
               variant="contained"
               color="primary"
               onClick={handleAddInput}
-              sx={{ mt: "1rem", ml:"1rem"}}
+              
+              sx={{ mt: "1rem",
+              ml: "1%",
+              backgroundColor: "#0054ff",
+              "&:hover": {
+                backgroundColor: "#003dd8",
+              } }}
             >
-              <AddIcon/>
+              <AddIcon />
             </Button>
+
           )}
+
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleRemoveInput(index)}
+            className="btn-suppression"
+            sx={{ mt: "1rem",
+            ml: "1%",
+            backgroundColor: "#ff5b57",
+            "&:hover": {
+              backgroundColor: "#e54542",
+            }
+           }}
+            disabled={formData.length <= 1}
+          >
+            <RemoveIcon/>
+          </Button>
+
+
         </div>
       ))}
 
