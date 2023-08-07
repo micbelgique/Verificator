@@ -24,7 +24,9 @@ const decodeListOfUrl = (urls: string[]): string[] => {
 const splitAndDecodeURls = (urlString: string): string[] => {
   return decodeListOfUrl(splitString(urlString));
 };
-
+/*
+COMPOSANT
+*/
 function CheckURL() {
   const searchParams = new URLSearchParams(document.location.search);
   const [urlValue] = useState(
@@ -49,6 +51,7 @@ function CheckURL() {
 
   const [currentTagIndexDetected, setCurrentTagIndexDetected] =
     useState<number>();
+
 
   //initialisation liste des camera
   useEffect(() => {
@@ -92,6 +95,7 @@ function CheckURL() {
     }
   };
 
+  //useEffect de detection
   useEffect(() => {
     if (!isStreaming) return;
     intervalRef.current = setInterval(() => {
@@ -227,13 +231,12 @@ function CheckURL() {
           <iframe
             id="externalWebsiteFrame"
             title="Redirection"
-            src={redirect[currentTagIndexDetected ?? 0]}
+            src={redirect[currentTagIndexDetected ?? 0] + "?autoplay=1&mute=1"}
             style={{
               width: "50rem", // Set the desired width, e.g., "500px", "50%", etc.
               height: "25rem", // Set the desired height
-
-              border: "none", // Optionally add border styles
             }}
+            allow="autoplay"
           ></iframe>
           <br />
           <a href={redirect[currentTagIndexDetected ?? 0]}>
