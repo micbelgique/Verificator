@@ -5,8 +5,8 @@ import {
   Slider,
   Typography,
 } from "@mui/material";
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 import { useState } from "react";
 
 function Form() {
@@ -20,6 +20,7 @@ function Form() {
   const handleButtonClick = () => {
     if (!urlField || !keyField) return;
     const url = new URL("https://gray-glacier-0cb99cc03.3.azurestaticapps.net/setting");
+    // const url = new URL("http://localhost:5173/setting");
     url.searchParams.set("URL", encodeURIComponent(urlField));
     url.searchParams.set("KEY", keyField);
     url.searchParams.set("TAG", formData.map((data) => data.tag).join(";"));
@@ -27,11 +28,9 @@ function Form() {
     url.searchParams.set(
       "REDIRECT",
       formData.map((data) => encodeURIComponent(data.nextStep)).join(";")
-
     );
     window.location.href = url.toString();
   };
-
 
   const handleAddInput = () => {
     setFormData([...formData, { tag: "", nextStep: "" }]);
@@ -100,17 +99,17 @@ function Form() {
               variant="contained"
               color="primary"
               onClick={handleAddInput}
-              
-              sx={{ mt: "1rem",
-              ml: "1%",
-              backgroundColor: "#0054ff",
-              "&:hover": {
-                backgroundColor: "#003dd8",
-              } }}
+              sx={{
+                mt: "1rem",
+                ml: "1%",
+                backgroundColor: "#0054ff",
+                "&:hover": {
+                  backgroundColor: "#003dd8",
+                },
+              }}
             >
               <AddIcon />
             </Button>
-
           )}
 
           <Button
@@ -118,19 +117,18 @@ function Form() {
             color="primary"
             onClick={() => handleRemoveInput(index)}
             className="btn-suppression"
-            sx={{ mt: "1rem",
-            ml: "1%",
-            backgroundColor: "#ff5b57",
-            "&:hover": {
-              backgroundColor: "#e54542",
-            }
-           }}
+            sx={{
+              mt: "1rem",
+              ml: "1%",
+              backgroundColor: "#ff5b57",
+              "&:hover": {
+                backgroundColor: "#e54542",
+              },
+            }}
             disabled={formData.length <= 1}
           >
-            <RemoveIcon/>
+            <RemoveIcon />
           </Button>
-
-
         </div>
       ))}
 

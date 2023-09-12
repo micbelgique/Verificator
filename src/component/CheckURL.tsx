@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import Webcam from "react-webcam";
 
 import CameraIcon from "@mui/icons-material/Camera";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 interface Prediction {
   probability: number;
@@ -43,17 +44,17 @@ function CheckURL() {
   const [isStreaming, setIsStreaming] = useState(true);
   const [conditionRespected, setConditionRespected] = useState(false);
   const [showCam, setShowCam] = useState(false);
+  const [paramshowCam, setParamShowCam] = useState(false);
   const videoRef = useRef<Webcam>(null);
   const image = useRef<string | null | undefined>(null);
   const intervalRef = useRef<number | undefined>(undefined);
   const [webcams, setWebCams] = useState<MediaDeviceInfo[]>();
-  const [choosenCam, setChoosenCam] = useState<string>();
+  let [choosenCam, setChoosenCam] = useState<string>();
 
   const [currentTagIndexDetected, setCurrentTagIndexDetected] =
     useState<number>();
 
-
-  //initialisation liste des camera
+  //initialisation liste des cameras
   useEffect(() => {
     navigator.mediaDevices.enumerateDevices().then((result) => {
       const tabCams: MediaDeviceInfo[] = result.filter(
@@ -82,9 +83,7 @@ function CheckURL() {
   // Méthode pour capturer une image depuis le flux vidéo
   const captureImage = () => {
     const video = videoRef.current?.video!;
-
     const canvas: HTMLCanvasElement = document.createElement("canvas");
-
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const context = canvas.getContext("2d");
@@ -172,60 +171,92 @@ function CheckURL() {
     document.body.style.backgroundColor = "";
   }
 
+  const showsettings = () => {
+    setParamShowCam(!paramshowCam);
+  };
   return (
     <>
+      <Button
+        variant="contained"
+        sx={{
+          position: "absolute",
+          top: "50px",
+          right: "50px",
+          zIndex: "1000",
+          width: "2rem",
+          height: "3.4rem",
+          backgroundColor: "#f1f1f1",
+          color: "black",
+          fontWeight: "bold",
+          "&:hover": {
+            backgroundColor: "black",
+            color: "white",
+          },
+        }}
+        onClick={showsettings}
+      >
+        <SettingsIcon />
+      </Button>
       {choosenCam !== undefined && (
         <>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={choosenCam}
-            label="Webcam"
-            onChange={handleSelectCamChange}
-            sx={{
-              minWidth: "200px",
-              margin: "10px",
-              backgroundColor: "#f1f1f1",
-              borderRadius: "5px", //
+          <div
+            style={{
+             
+              display: paramshowCam ? "block" : "none",
             }}
           >
-            {webcams?.map((camInfo) => {
-              return (
-                <MenuItem key={camInfo.deviceId} value={camInfo.deviceId}>
-                  {camInfo.label}
-                </MenuItem>
-              );
-            })}
-          </Select>
-          <Button
-            variant="contained"
-            sx={{
-              ml: "1rem",
-              width: "2rem",
-              height: "3.4rem",
-              backgroundColor: "#f1f1f1",
-              color: "black",
-              fontWeight: "bold",
-              "&:hover": {
-                backgroundColor: "black",
-                color: "white",
-              },
-            }}
-            onClick={toggleCameraVisibility}
-          >
-            <CameraIcon />
-          </Button>
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={choosenCam}
+              label="Webcam"
+              onChange={handleSelectCamChange}
+              sx={{
+                minWidth: "200px",
+                margin: "10px",
+                backgroundColor: "#f1f1f1",
+                borderRadius: "5px", //
+              }}
+            >
+              {webcams?.map((camInfo) => {
+                return (
+                  <MenuItem key={camInfo.deviceId} value={camInfo.deviceId}>
+                    {camInfo.label}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+            <Button
+              variant="contained"
+              sx={{
+                ml: "1rem",
+                width: "2rem",
+                height: "3.4rem",
+                backgroundColor: "#f1f1f1",
+                color: "black",
+                fontWeight: "bold",
+                "&:hover": {
+                  backgroundColor: "black",
+                  color: "white",
+                },
+              }}
+              onClick={toggleCameraVisibility}
+            >
+              <CameraIcon />
+            </Button>
 
-          <br />
-          <Webcam
-            audio={false}
-            height={360}
-            width={740}
-            ref={videoRef}
-            className={showCam ? "" : "hidden-video"}
-          />
+            <br />
+            <Webcam
+              audio={false}
+              height={360}
+              width={740}
+              ref={videoRef}
+              className={showCam ? "" : "hidden-video"}
+            />
+          </div>
         </>
       )}
+
       {conditionRespected ? (
         <h1>
           <iframe
@@ -245,12 +276,7 @@ function CheckURL() {
         </h1>
       ) : (
         <>
-          <h2>
-            {tagValue
-              ? "Nothing detected"
-              : "Put a tag in the URL"}
-            
-          </h2>
+          <h2>{tagValue ? "Nothing detected" : "Put a tag in the URL"}</h2>
         </>
       )}
     </>

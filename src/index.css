@@ -66,5 +66,9 @@ button:focus-visible {
   width: 150vh;
 }
 
+.hidden-settings {
+  display: none;
+}
+
 
 
