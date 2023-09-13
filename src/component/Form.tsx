@@ -19,8 +19,8 @@ function Form() {
 
   const handleButtonClick = () => {
     if (!urlField || !keyField) return;
-    const url = new URL("https://gray-glacier-0cb99cc03.3.azurestaticapps.net/setting");
-    // const url = new URL("http://localhost:5173/setting");
+    // const url = new URL("https://gray-glacier-0cb99cc03.3.azurestaticapps.net/setting");
+    const url = new URL("http://localhost:5173/setting");
     url.searchParams.set("URL", encodeURIComponent(urlField));
     url.searchParams.set("KEY", keyField);
     url.searchParams.set("TAG", formData.map((data) => data.tag).join(";"));

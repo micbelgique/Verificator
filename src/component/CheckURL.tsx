@@ -173,6 +173,7 @@ function CheckURL() {
 
   const showsettings = () => {
     setParamShowCam(!paramshowCam);
+    setShowCam(false);
   };
   return (
     <>
@@ -246,6 +247,7 @@ function CheckURL() {
             </Button>
 
             <br />
+            </div>
             <Webcam
               audio={false}
               height={360}
@@ -253,7 +255,7 @@ function CheckURL() {
               ref={videoRef}
               className={showCam ? "" : "hidden-video"}
             />
-          </div>
+          
         </>
       )}
 
